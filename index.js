@@ -16,8 +16,8 @@ app.use('*', (req, res, next) => {
 app.get('/api/info', (req, res) => {
     // let path = req.request.path
     // console.log(`op route ${path}`)
-    res.status(200).json({
-        status: 200,
+    res.status(201).json({
+        status: 201,
         message: 'Server info-endpoint',
         data: {
             studentName: 'Kenan',
@@ -31,16 +31,81 @@ app.listen(port, () => {
     logger.log(`Example app listening on port ${port}`)
 })
 
+let database = {
+    users: [
+        {
+            id: 1,
+            firstname: 'Kenan',
+            lastname: 'van der Heijden',
+            email: 'kenanvdh@ziggo.nl',
+            password: 'Welkom01!'
+        },
+        {
+            id: 2,
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'Johndoe@gmail.com',
+            password: 'Welkom02!'
+        },
+        {
+            id: 3,
+            firstName: 'Jane',
+            lastName: 'Doe',
+            email: 'Janedoe@gmail.com',
+            password: 'Welkom03!'
+        }
+    ]
+}
+
+let index = database.users.length;
+
+
+
 //UC-201
 app.post('/api/register', (req, res) => {
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
-    const id = ++userIdCounter;
-    const newUser = { id, firstName, lastName, email };
+    if (!firstName || !lastName || !email || !password) {
+        res.status(400).json({
+            status: 400,
+            message: 'All fields are required!',
+            data: {}
+        })
+        return
+    };
 
-    res.status(200).json({
-        status: 200,
-        message: 'user register',
+    const emailRegex = /\S+@\S+.\S+/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+
+    if (!emailRegex.test(email)) {
+        res.status(400).json({ message: 'Invalid email format!' });
+        return;
+    }
+
+    if (!passwordRegex.test(password)) {
+        res.status(400).json({ message: 'Invalid password!' });
+        return;
+    }
+
+    const user = database.users.find(u => u.email === email);
+
+    if (user) {
+        res.status(403).json({
+            status: 403,
+            message: 'User already exists!',
+            data: {}
+        });
+        return;
+    }
+
+    user.id = index++;
+    const newUser = { id, firstName, lastName, email, password };
+
+    database['users'].push(newUser);
+
+    res.status(201).json({
+        status: 201,
+        message: 'User registered',
         data: {
             newUser
         }
@@ -48,29 +113,6 @@ app.post('/api/register', (req, res) => {
 });
 
 //UC-202
-let database = {
-    users: [
-        {
-            id: 1,
-            firstname: 'Kenan',
-            lastname: 'van der Heijden',
-            email: 'kenanvdh@ziggo.nl'
-        },
-        {
-            id: 2,
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'Johndoe@gmail.com'
-        },
-        {
-            id: 3,
-            firstName: 'Jane',
-            lastName: 'Doe',
-            email: 'Janedoe@gmail.com'
-        }
-    ]
-};
-
 app.get('/api/user', (req, res) => {
     res.status(200).json({
         status: 200,
@@ -82,13 +124,11 @@ app.get('/api/user', (req, res) => {
 
 //UC-203
 app.get('/api/user/profile', (req, res) => {
-    const user = { id: 1, name: 'John Doe', email: 'john.doe@example.com' };
+    const user = { id: 1, name: 'John Doe', email: 'john.doe@example.com', password: 'joe' };
     res.status(200).json({
         status: 200,
         message: 'user profiel',
-        data: {
-            user
-        }
+        data: user
     })
 });
 
@@ -109,7 +149,7 @@ app.get('/api/user/:userId', (req, res) => {
 
     res.status(200).json({
         status: 200,
-        message: 'user profiel',
+        message: 'user id info endpoint',
         data: user
     })
 });
@@ -129,12 +169,13 @@ app.put('/api/user/:userId', (req, res) => {
         return;
     }
 
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // update user information
     user.firstName = firstName;
     user.lastName = lastName;
     user.email = email;
+    user.password = password;
 
     res.status(200).json({
         status: 200,
