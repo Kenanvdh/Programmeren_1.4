@@ -10,7 +10,7 @@ const assert = require('assert');
 describe('User id', function () {
     it('TC-204-3 - User shown', (done) => {
         // Voer de test uit
-        const userId = 3;
+        const userId = 2;
 
         chai
             .request(server)
