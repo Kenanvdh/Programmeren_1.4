@@ -30,7 +30,7 @@ app.get('/api/info', (req, res) => {
     })
 });
 
-//Routes van Use cases
+//Routes van Use cases 201 t/m 206
 app.use('/api/user', routes)
 
 app.use('*', (req, res) => {
