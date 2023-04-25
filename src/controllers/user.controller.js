@@ -42,96 +42,101 @@ const userController = {
         const method = req.method
         logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
 
-        // Check for missing fields
-        if (!user.firstname || typeof user.firstname !== 'string') {
-            res.status(400).json({
-                status: 400,
-                message: 'firstname (string) is invalid!',
-                data: {}
-            });
-            return;
-        }
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                console.log('error')
+                next('error: ' + err.message)
+            }
+            if (conn) {
+                conn.query(
+                    'SELECT COUNT(*) AS count FROM `user`',
+                    function (err, results) {
+                        if (err) {
+                            res.status(500).json({
+                                status: 500,
+                                message: err.sqlMessage,
+                                data: {}
+                            });
+                            return;
+                        }
 
-        if (!user.lastname || typeof user.lastname !== 'string') {
-            res.status(400).json({
-                status: 400,
-                message: 'lastname (string) is invalid!',
-                data: {}
-            });
-            return;
-        }
+                        const count = results[0].count;
+                        const userId = count + 1;
 
-        if (!user.email || typeof user.email !== 'string') {
-            res.status(400).json({
-                status: 400,
-                message: 'email (string) is invalid!',
-                data: {}
-            });
-            return;
-        }
+                        const user = {
+                            id: userId,
+                            firstName: req.body.firstName,
+                            lastName: req.body.lastName,
+                            isActive: 1,
+                            emailAdress: req.body.emailAdress,
+                            password: req.body.password,
+                            phoneNumber: req.body.phoneNumber,
+                            roles: req.body.roles,
+                            street: req.body.street,
+                            city: req.body.city
+                        };
 
-        if (!user.password || typeof user.password !== 'string') {
-            res.status(400).json({
-                status: 400,
-                message: 'password (string) is invalid!',
-                data: {}
-            });
-            return;
-        }
+                        // Check for missing fields
+                        if (!user.firstName || typeof user.firstName !== 'string') {
+                            res.status(400).json({
+                                status: 400,
+                                message: 'firstName (string) is invalid!',
+                                data: {}
+                            });
+                            return;
+                        }
 
-        // Check for invalid email format
-        const emailRegex = /\S+@\S+.\S+/;
-        if (!emailRegex.test(user.email)) {
-            res.status(400).json({
-                status: 400,
-                message: 'Invalid email format!',
-                data: {}
-            });
-            return
-        }
+                        if (!user.lastName || typeof user.lastName !== 'string') {
+                            res.status(400).json({
+                                status: 400,
+                                message: 'lastName (string) is invalid!',
+                                data: {}
+                            });
+                            return;
+                        }
 
-        const phoneRegex = /^(06)[0-9]{8}$/;
-        if (!phoneRegex.test(user.phoneNumber)) {
-            res.status(400).json({
-                status: 400,
-                message: 'Invalid phone number format!',
-                data: {}
-            });
-            return;
-        }
+                        if (!user.emailAdress || typeof user.emailAdress !== 'string') {
+                            res.status(400).json({
+                                status: 400,
+                                message: 'email (string) is invalid!',
+                                data: {}
+                            });
+                            return;
+                        }
 
-        // Check for invalid password format
-        // const passwordRegex = /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
-        const passwordRegex = /^[A-Z]$/;
-        if (!passwordRegex.test(user.password)) {
-            res.status(400).json({
-                status: 400,
-                message: 'Invalid password format!',
-                data: {}
-            });
-            return;
-        }
+                        if (!user.password || typeof user.password !== 'string') {
+                            res.status(400).json({
+                                status: 400,
+                                message: 'password (string) is invalid!',
+                                data: {}
+                            });
+                            return;
+                        }
+                        conn.query(
+                            'INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `phoneNumber`, `roles`, `street`, `city`) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                            [user.id, user.firstName, user.lastName, user.emailAdress, user.password, user.phoneNumber, user.roles, user.street, user.city],
+                            function (err, results) {
+                                if (err) {
+                                    res.status(500).json({
+                                        status: 500,
+                                        message: err.sqlMessage,
+                                        data: {}
+                                    });
+                                    return;
+                                }
 
-        // Check for existing user with the same email
-        const existingUser = pool.users.find(u => u.email === user.email);
-        if (existingUser) {
-            res.status(403).json({
-                status: 403,
-                message: 'User email adres already exists',
-                data: {}
-            });
-            return;
-        }
-
-        // Add the new user
-        user.active = true;
-        user.id = pool.index++;
-        pool.users.push(user);
-
-        res.status(201).json({
-            status: 201,
-            message: `User added with id ${user.id}`,
-            data: user
+                                logger.info('results: ', results); // results contains rows returned by server
+                                res.status(200).json({
+                                    status: 200,
+                                    message: 'User added with id ' + user.id,
+                                    data: results
+                                });
+                            }
+                        );
+                    }
+                );
+                pool.releaseConnection(conn);
+            }
         });
     },
 
@@ -160,24 +165,47 @@ const userController = {
         const method = req.method
         logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
 
-
         const userId = parseInt(req.params.userId);
-        const user = database.users.find(user => user.id === userId)
 
-        if (!user) {
-            res.status(404).json({
-                status: 404,
-                message: 'User not found',
-                data: {}
-            });
-            return;
-        }
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                console.log('error');
+            }
+            if (conn) {
+                conn.query('SELECT * FROM `user` WHERE `id` = ?', [userId], // use `?` as a placeholder
+                    function (err, results) {
+                        if (err) {
+                            res.status(500).json(
+                                {
+                                    status: 500,
+                                    message: err.sqlMessage,
+                                    data: {}
+                                });
+                        }
+                        if (results.length === 0) {
+                            res.status(404).json({
+                                status: 404,
+                                message: 'User not found',
+                                data: {}
+                            });
+                            return;
+                        }
+                        if (results) {
+                            //logger.info('Results: ', results); // results contains rows returned by server
 
-        res.status(200).json({
-            status: 200,
-            message: 'user id info endpoint',
-            data: user
-        })
+                            res.status(200).json(
+                                {
+                                    status: 200,
+                                    message: 'User endpoint',
+                                    data: results
+                                });
+                        }
+
+                    }
+                );
+            }
+            pool.releaseConnection;
+        });
     },
 
     updateUser: (req, res) => {
