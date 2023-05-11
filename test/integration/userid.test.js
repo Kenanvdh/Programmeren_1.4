@@ -72,6 +72,20 @@ describe('Users API', () => {
                 );
             });
         });
+        it('TC-204-2- Should return error on non-existant user with the specified ID', (done) => {
+            const userId = -1
+            chai
+                .request(server)
+                .get(`/api/user/${userId}`)
+                .end((err, res) => {
+                    assert(err === null)
+                    let { status, message, data } = res.body
+                    expect(status).to.equal(404)
+                    expect(message).to.equal('User not found')
+                    expect(data).to.be.an('object')  
+                    done()
+                })
+        });
 
         it('TC-204-3 - User shown', (done) => {
             // Voer de test uit

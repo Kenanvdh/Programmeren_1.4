@@ -71,7 +71,6 @@ describe('Users API', () => {
                 );
             });
         });
-
         it('TC-202-1 - Useroverview shown', (done) => {
             // Voer de test uit
             chai
@@ -87,5 +86,66 @@ describe('Users API', () => {
                     done();
                 })
         })
+        it('TC-201-1- Server should return valid error on empty necessary inputfield', (done) => {
+            chai
+                .request(server)
+                .post('/api/user')
+                .end((err, res) => {
+                    assert(err === null)
+                    expect(res).to.have.status(400);
+                    expect(res.body.data).to.be.an('object');
+                    expect(res.body.data).to.be.empty;
+                    expect(res.body.message).to.contain('is invalid!');
+                    done();
+                });
+        });
+        it('TC-201-2- Server should return valid error on invalid email adress', (done) => {
+            const invalidEmail = 'invalid-email';
+            chai
+                .request(server)
+                .post('/api/user')
+                .send({ firstName: 'Jelle', lastName: 'van Pol', emailAdress: invalidEmail, password: 'Password' })
+                .end((err, res) => {
+                    assert(err === null)
+                    expect(res).to.have.status(400);
+                    expect(res.body.message).to.equal('email (string) is invalid!');
+                    done();
+                });
+        });
+        it('TC-201-3- Server should return valid error on invalid password', (done) => {
+            const invalidPassword = 'invalid-password';
+            chai
+                .request(server)
+                .post('/api/user')
+                .send({ firstName: 'Jelle', lastName: 'van Pol', emailAdress: 'Test@ziggo.nl', password: invalidPassword, phoneNumber: '06 12345678' })
+                .end((err, res) => {
+                    assert(err === null)
+                    expect(res).to.have.status(400);
+                    expect(res.body.message).to.equal('Invalid password format!');
+                    done();
+                });
+        });
+        it('TC-201-4- Server should return valid error on existing user', (done) => {
+            const newUser = {
+                firstName: 'Jelle',
+                lastName: 'van Pol',
+                email: 'Jellevanpol@ziggo.nl',
+                password: 'Password1!',
+                phoneNumber: '0638681055',
+                active: true
+            }
+
+            chai
+                .request(server)
+                .post('/api/user')
+                .send(newUser)
+                .end((err, res) => {
+                    assert(err === null)
+                    expect(res).to.have.status(403);
+                    expect(res.body.message).to.equal('User already registered');
+                    done();
+                });
+        });
+
     })
 })
