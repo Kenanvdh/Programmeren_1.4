@@ -1,105 +1,98 @@
-const chai = require('chai')
-const chaihttp = require('chai-http')
-const server = require('../../index')
+process.env.DB_DATABASE =
+    process.env.DB_DATABASE || 'shareamealtest' || 'shareameal';
+require('tracer').setLevel('debug');
 
-chai.should()
-const expect = chai.expect;
-chai.use(chaihttp)
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const server = require('../../index');
 const assert = require('assert');
+const logger = require('../../src/util/utils').logger;
+// require('dotenv').config()
+const dbconnection = require('../../src/util/mysql-db');
+// const jwt = require('jsonwebtoken')
+// const { jwtSecretKey, logger } = require('../../src/config/config')
 
-describe('Register', function () {
-    // it('TC-201-1- Server should return valid error on empty necessary input', (done) => {
-    //     chai
-    //         .request(server)
-    //         .post('/api/user')
-    //         .end((err, res) => {
-    //             expect(res.body.data).to.be.an('object')
-    //             expect(res.body.data).to.be.empty
-    //             expect(res).to.have.status(400)
-    //             expect(res.body.message).to.equal('firstName (string) is invalid!')
-    //             done()
-    //         });
-    // });
+chai.should();
+chai.use(chaiHttp);
 
-    // it('TC-201-2- Server should return valid error on wrong formatted email', (done) => {
-    //     const invalidEmail = 'invalid-email';
-    //     chai
-    //         .request(server)
-    //         .post('/api/user')
-    //         .send({ firstName: 'Kenan', lastName: 'van der Heijden', email: invalidEmail, password: 'yes' })
-    //         .end((err, res) => {
-    //             expect(res).to.have.status(400)
-    //             expect(res.body.message).to.equal('Invalid email format!')
-    //             done()
-    //         });
-    // });
+/**
+ * Db queries to clear and fill the test database before each test.
+ *
+ * LET OP: om via de mysql2 package meerdere queries in één keer uit te kunnen voeren,
+ * moet je de optie 'multipleStatements: true' in de database config hebben staan.
+ */
+const CLEAR_MEAL_TABLE = 'DELETE IGNORE FROM `meal`;';
+const CLEAR_PARTICIPANTS_TABLE = 'DELETE IGNORE FROM `meal_participants_user`;';
+const CLEAR_USERS_TABLE = 'DELETE IGNORE FROM `user`;';
+const CLEAR_DB =
+    CLEAR_MEAL_TABLE + CLEAR_PARTICIPANTS_TABLE + CLEAR_USERS_TABLE;
 
-    // it('TC-201-3- Server should return valid error on wrong formatted password', (done) => {
-    //     const invalidPassword = 'invalid-password';
-    //     chai
-    //         .request(server)
-    //         .post('/api/user')
-    //         .send({ firstName: 'Kenan', lastName: 'van der Heijden', email: 'kenanvdh@ziggo.nl', password: invalidPassword })
-    //         .end((err, res) => {
-    //             expect(res).to.have.status(400)
-    //             expect(res.body.message).to.equal('Invalid phone number format!')
-    //             done()
-    //         });
-    // });
+/**
+ * Voeg een user toe aan de database. Deze user heeft id 1.
+ * Deze id kun je als foreign key gebruiken in de andere queries, bv insert meal.
+ */
+const INSERT_USER =
+    'INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES' +
+    '(1, "first", "last", "name@server.nl", "secret", "street", "city");';
 
-    // it('TC-201-4- Server should return valid error on existing user', (done) => {
-    //     const user =
-    //     {
-    //         firstname: 'Kenan',
-    //         lastname: 'van der Heijden',
-    //         email: 'kenanvdh@ziggo.nl',
-    //         password: 'Welkom01!',
-    //         phoneNumber: '0642108889',
-    //         active: true
-    //     }
-    //     chai
-    //         .request(server)
-    //         .post('/api/user')
-    //         .send(user)
-    //         .end((err, res) => {
-    //             assert(err === null)
-    //             expect(res).to.have.status(403);
-    //             expect(res.body.message).to.equal('User email adres already exists!');
-    //             done();
-    //         });
-    // });
 
-    it('TC-201-5- Server should return succes on user registered', (done) => {
-        const newUser = {
-            firstName: "Johnny",
-            lastName: "Doe",
-            isActive: 1,
-            emailAdress: "johnny1.doe5@server.com",
-            password: "secret1",
-            phoneNumber: "06 72525475",
-            roles: "editor,guest",
-            street: "",
-            city: "Breda"
-        };
-
-        chai
-            .request(server)
-            .post('/api/user')
-            .send(newUser)
-            .end((err, res) => {
-                assert(err === null)
-
-                let { data, message, status } = res.body
-                res.body.should.be.an('object')
-
-                status.should.equal(201)
-                message.should.be.a('string').that.contains('User added with id ')
-
-                data.should.have.property('id')
-                data.firstName.should.equal('Jan')
-                data.lastName.should.equal('Steen')
-
-                done();
-            });
+describe('Users API', () => {
+    before((done) => {
+        logger.debug(
+            'before: hier zorg je eventueel dat de precondities correct zijn'
+        );
+        logger.debug('before done');
+        done();
     });
-});
+
+    describe('UC-205 [Register user]', () => {
+        beforeEach((done) => {
+            logger.debug('beforeEach called');
+            // maak de testdatabase leeg zodat we onze testen kunnen uitvoeren.
+            dbconnection.getConnection(function (err, connection) {
+                if (err) {
+                    done(err);
+                    throw err; // no connection
+                }
+                // Use the connection
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function (error, results, fields) {
+                        if (error) {
+                            done(error);
+                            throw error; // not connected!
+                        }
+                        logger.debug('beforeEach done');
+                        // When done with the connection, release it.
+                        dbconnection.releaseConnection(connection);
+                        // Let op dat je done() pas aanroept als de query callback eindigt!
+                        done();
+                    }
+                );
+            });
+        });
+
+        it('TC-201-5- Server should return succes on user registered', (done) => {
+            chai
+                .request(server)
+                .post('/api/user')
+                .send(newUser)
+                .end((err, res) => {
+                    assert(err === null)
+
+                    let { data, message, status } = res.body
+                    res.body.should.be.an('object')
+
+                    status.should.equal(201)
+                    message.should.be.a('string').that.contains('User added with id ')
+
+                    data.should.have.property('id')
+                    data.firstName.should.equal('Jan')
+                    data.lastName.should.equal('Steen')
+
+                    done();
+                });
+        });
+    })
+})
+
