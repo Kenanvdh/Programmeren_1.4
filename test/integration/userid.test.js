@@ -17,10 +17,11 @@ describe('User id', function () {
             .get(`/api/user/${userId}`)
             .end((err, res) => {
                 assert(err === null);
+
                 let { data, message, status } = res.body;
 
                 expect(status).to.equal(200);
-                expect(message).to.equal('user id info endpoint')
+                expect(message).to.equal('User endpoint')
 
                 expect(data).to.be.an('object')
                 expect(data.id).to.equal(userId)

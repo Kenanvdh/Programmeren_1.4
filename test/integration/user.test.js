@@ -17,7 +17,7 @@ describe('User overview', function () {
                 assert(err === null);
                 let { data, message, status } = res.body;
                 expect(res).to.have.status(200);
-                expect(message).to.equal('User list')
+                expect(message).to.equal('User getAll endpoint')
                 expect(res.body.data).to.be.an('array')
                 expect(res.body.data.length).to.be.at.least(2)
                 done();

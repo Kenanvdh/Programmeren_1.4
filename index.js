@@ -5,12 +5,6 @@ const logger = require('./src/util/utils').logger;
 const routes = require('./src/routes/user.routes')
 
 app.use(express.json())
-app.use('*', (req, res, next) => {
-    const method = req.method
-    logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
-    next()
-})
-
 app.listen(port, () => {
     logger.info(`Example app listening on port ${port}`)
 })
@@ -39,6 +33,12 @@ app.use('*', (req, res) => {
         message: 'Endpoint not found',
         data: {}
     })
+})
+
+app.use('*', (req, res, next) => {
+    const method = req.method
+    logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
+    next()
 })
 
 module.exports = app

@@ -71,27 +71,29 @@ describe('Register', function () {
 
     it('TC-201-5- Server should return succes on user registered', (done) => {
         const newUser = {
-            firstName: 'Jan',
-            lastName: 'Steen',
-            email: 'Testemail@gmail.nl',
-            password: 'Welkom04!',
-            phoneNumber: '0698754321',
-            active: true
+            firstName: "Johnny",
+            lastName: "Doe",
+            isActive: 1,
+            emailAdress: "johnny1.doe5@server.com",
+            password: "secret1",
+            phoneNumber: "06 72525475",
+            roles: "editor,guest",
+            street: "",
+            city: "Breda"
         };
 
         chai
             .request(server)
-            .post('/api/register')
+            .post('/api/user')
             .send(newUser)
             .end((err, res) => {
                 assert(err === null)
 
-                res.body.should.be.an('object')
                 let { data, message, status } = res.body
+                res.body.should.be.an('object')
 
                 status.should.equal(201)
                 message.should.be.a('string').that.contains('User added with id ')
-                data.should.be.an('object')
 
                 data.should.have.property('id')
                 data.firstName.should.equal('Jan')
