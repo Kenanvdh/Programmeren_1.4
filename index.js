@@ -1,12 +1,12 @@
 const express = require('express')
-const app = express()
-const port = process.env.PORT || 3000
 const logger = require('./src/util/utils').logger;
 const userRoutes = require('./src/routes/user.routes')
 const mealRoutes = require('./src/routes/meal.routes');
 const authRoutes = require('./src/routes/auth.routes')
+const app = express()
+const port = process.env.PORT || 3000;
 
-app.use(express.json())
+app.use(express.json()) 
 app.listen(port, () => {
     logger.info(`Example app listening on port ${port}`)
 })
