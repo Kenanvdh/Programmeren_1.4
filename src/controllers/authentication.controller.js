@@ -76,7 +76,6 @@ module.exports = {
                         }
                     }
                 });
-
                 pool.releaseConnection(connection);
             }
         });
@@ -87,6 +86,7 @@ module.exports = {
      * valideert of de vereiste body aanwezig is.
      */
     validateLogin(req, res, next) {
+        logger.info('validateLogin called')
         // Verify that we receive the expected input
         try {
             assert(
@@ -113,6 +113,7 @@ module.exports = {
         const authHeader = req.headers.authorization;
         logger.info('AuthHeader:', authHeader)
         if (!authHeader) {
+            logger.info('No authHeader found!')
             next({
                 code: 401,
                 message: 'Authorization header missing!',
@@ -123,30 +124,24 @@ module.exports = {
              * We hebben de headers. Lees het token daaruit, valideer het token
              * en lees de payload daaruit. De userId uit de payload stop je in de req,
              * en ga naar de volgende endpoint.
-             * Zie de Ppt van de les over authenticatie voor tips en tricks.
              */
 
             const token = authHeader.substring(7, authHeader.length)
+            const payload = jwt.decode(token); // Decode the payload
 
-            jwt.verify(token, jwtSecretKey, (err, payload) => {
-                logger.info('Payload: ', payload, ' with jwtSecretKey: ', jwtSecretKey, ' and token:',token, '\n')
-              
-                if (err) {
-                    logger.info('Error handling for error: ', err)
-                    res.status(400).json({
-                        status: 400,
-                        message: 'Error',
-                        data: {},
-                    })
-                }
-                logger.info('No error found, adding payload:', payload ,'to req.body')
-                if (payload) {
-                    //user id uit payload in request toevoegen en door naar de volgende handler functie
-                    req.userId = payload.userId
-                    logger.info('Payload ', payload, 'added to the body')
-                    next()
-                }
-            })
+            if (!payload) {
+                logger.info('Invalid token!')
+                next({
+                    code: 401,
+                    message: 'Invalid token!',
+                    data: undefined
+                });
+            } else {
+                // Store the userId in the request object
+                req.userId = payload.userId;
+                logger.info('Payload', payload, 'decoded successfully!')
+                next();
+            }
         }
     }
 };
