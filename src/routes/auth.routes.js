@@ -3,5 +3,5 @@ const router = express.Router();
 const authController = require('../controllers/authentication.controller');
 
 // UC-101 Inloggen toevoegen
-router.post('/login', authController.login)
+router.post('/login', authController.login, authController.validateToken)
 module.exports = router;
