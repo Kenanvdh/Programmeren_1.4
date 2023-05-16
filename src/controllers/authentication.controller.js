@@ -63,6 +63,8 @@ module.exports = {
                                         }
                                     });
                                 }
+                                logger.info('Payload: ', payload)
+
                             });
                         } else {
                             //user wel gevonden maar password matcht niet
@@ -74,12 +76,13 @@ module.exports = {
                         }
                     }
                 });
+
                 pool.releaseConnection(connection);
             }
         });
     },
 
-    /**
+    /*
      * Validatie functie voor /api/login,
      * valideert of de vereiste body aanwezig is.
      */
@@ -103,14 +106,12 @@ module.exports = {
         }
     },
 
-    //
-    //
-    //
     validateToken(req, res, next) {
-        logger.trace('validateToken called');
+        logger.info('validateToken called');
         // logger.trace(req.headers)
         // The headers should contain the authorization-field with value 'Bearer [token]'
         const authHeader = req.headers.authorization;
+        logger.info('AuthHeader:', authHeader)
         if (!authHeader) {
             next({
                 code: 401,
@@ -126,19 +127,23 @@ module.exports = {
              */
 
             const token = authHeader.substring(7, authHeader.length)
-            logger.trace('token', token)
 
             jwt.verify(token, jwtSecretKey, (err, payload) => {
+                logger.info('Payload: ', payload, ' with jwtSecretKey: ', jwtSecretKey, ' and token:',token, '\n')
+              
                 if (err) {
-                    next({
-                        code: 401,
-                        message: 'Not authorized!',
-                        data: undefined
-                    });
+                    logger.info('Error handling for error: ', err)
+                    res.status(400).json({
+                        status: 400,
+                        message: 'Error',
+                        data: {},
+                    })
                 }
+                logger.info('No error found, adding payload:', payload ,'to req.body')
                 if (payload) {
                     //user id uit payload in request toevoegen en door naar de volgende handler functie
                     req.userId = payload.userId
+                    logger.info('Payload ', payload, 'added to the body')
                     next()
                 }
             })
