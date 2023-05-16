@@ -9,8 +9,8 @@ router.post('', userController.createUser);
 //UC-202
 router.get('', userController.getAllUsers);
 
-//UC-203
-router.get('/profile', userController.getProfile);
+// UC-203 Haal het userprofile op van de user die ingelogd is
+router.get('/profile', authController.validateToken, authController.validateLogin, userController.getUserProfile);
 
 //UC-204
 router.get('/:userId', userController.getUser);

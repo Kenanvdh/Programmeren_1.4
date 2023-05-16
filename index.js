@@ -2,7 +2,9 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 const logger = require('./src/util/utils').logger;
-const routes = require('./src/routes/user.routes')
+const userRoutes = require('./src/routes/user.routes')
+const mealRoutes = require('./src/routes/meal.routes');
+const authRoutes = require('./src/routes/auth.routes')
 
 app.use(express.json())
 app.listen(port, () => {
@@ -24,8 +26,10 @@ app.get('/api/info', (req, res) => {
     })
 });
 
-//Routes van Use cases 201 t/m 206
-app.use('/api/user', routes)
+//Routes
+app.use('/api/user', userRoutes)
+app.use('/api/meal', mealRoutes)
+app.use('/api', authRoutes)
 
 app.use('*', (req, res) => {
     res.status(404).json({

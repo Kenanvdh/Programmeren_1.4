@@ -1,10 +1,10 @@
 const logger = require('../util/utils').logger;
 const assert = require('assert')
-const database = require('../util/inmem-db')
 const pool = require('../util/mysql-db')
+const jwt = require('jsonwebtoken');
 
 const userController = {
-    getAllUsers: (req, res) => {
+    getAllUsers: (req, res, next) => {
         const method = req.method
         logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
 
@@ -37,7 +37,44 @@ const userController = {
         });
     },
 
-    createUser: (req, res) => {
+    getProfile: (req, res, next) => {
+        logger.trace('Get user profile for user', req.userId);
+
+        let sqlStatement = 'SELECT * FROM `user` WHERE id=?';
+
+        pool.getConnection(function (err, conn) {
+            // Do something with the connection
+            if (err) {
+                logger.error(err.code, err.syscall, err.address, err.port);
+                next({
+                    code: 500,
+                    message: err.code
+                });
+            }
+            if (conn) {
+                conn.query(sqlStatement, [req.userId], (err, results, fields) => {
+                    if (err) {
+                        logger.error(err.message);
+                        next({
+                            code: 409,
+                            message: err.message
+                        });
+                    }
+                    if (results) {
+                        logger.trace('Found', results.length, 'results');
+                        res.status(200).json({
+                            code: 200,
+                            message: 'Get User profile',
+                            data: results[0]
+                        });
+                    }
+                });
+                pool.releaseConnection(conn);
+            }
+        });
+    },
+
+    createUser: (req, res, next) => {
         pool.getConnection(function (err, conn) {
             if (err) {
                 console.log('error');
@@ -128,27 +165,6 @@ const userController = {
                 );
             }
         });
-    },
-
-    getProfile: (req, res) => {
-        const method = req.method
-        logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
-
-        const user = {
-            id: 3,
-            firstname: 'Test',
-            lastname: 'Tester',
-            email: 'test@ziggo.com',
-            password: 'Welkom04!',
-            phoneNumber: '0612345789',
-            active: false
-        }
-
-        res.status(200).json({
-            status: 200,
-            message: 'Functionaliteit nog niet gerealiseerd',
-            data: user
-        })
     },
 
     getUser: (req, res) => {
