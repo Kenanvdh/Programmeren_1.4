@@ -3,81 +3,6 @@ const assert = require('assert');
 const pool = require('../util/mysql-db');
 
 const mealController = {
-  getAllMeals: (req, res, next) => {
-    logger.info('Get all meals');
-
-    let sqlStatement = 'SELECT * FROM `meal`';
-    // Hier wil je misschien iets doen met mogelijke filterwaarden waarop je zoekt.
-
-    pool.getConnection(function (err, conn) {
-      // Do something with the connection
-      if (err) {
-        logger.error(err.code, err.syscall, err.address, err.port);
-        next({
-          code: 500,
-          message: err.code
-        });
-      }
-      if (conn) {
-        conn.query(sqlStatement, function (err, results, fields) {
-          if (err) {
-            logger.err(err.message);
-            next({
-              code: 409,
-              message: err.message
-            });
-          }
-          if (results) {
-            logger.info('Found', results.length, 'results');
-            res.status(200).json({
-              code: 200,
-              message: 'User getAll endpoint',
-              data: results
-            });
-          }
-        });
-        pool.releaseConnection(conn);
-      }
-    });
-  },
-
-  // getUserProfile: (req, res, next) => {
-  //   logger.trace('Get meal profile for meal', req.userId);
-
-  //   let sqlStatement = 'SELECT * FROM `meal` WHERE id=?';
-
-  //   pool.getConnection(function (err, conn) {
-  //     // Do something with the connection
-  //     if (err) {
-  //       logger.error(err.code, err.syscall, err.address, err.port);
-  //       next({
-  //         code: 500,
-  //         message: err.code
-  //       });
-  //     }
-  //     if (conn) {
-  //       conn.query(sqlStatement, [req.userId], (err, results, fields) => {
-  //         if (err) {
-  //           logger.error(err.message);
-  //           next({
-  //             code: 409,
-  //             message: err.message
-  //           });
-  //         }
-  //         if (results) {
-  //           logger.trace('Found', results.length, 'results');
-  //           res.status(200).json({
-  //             code: 200,
-  //             message: 'Get User profile',
-  //             data: results[0]
-  //           });
-  //         }
-  //       });
-  //       pool.releaseConnection(conn);
-  //     }
-  //   });
-  // },
-
   createMeal: (req, res, next) => {
     const userId = req.userId;
     logger.info('Create new meal, cookId: ' + cookId);
@@ -145,6 +70,48 @@ const mealController = {
               });
             }
           });
+        pool.releaseConnection(conn);
+      }
+    });
+  },
+
+  updateMeal: (req, res, next) => {
+
+  },
+
+  getAllMeals: (req, res, next) => {
+    logger.info('Get all meals');
+
+    let sqlStatement = 'SELECT * FROM `meal`';
+    // Hier wil je misschien iets doen met mogelijke filterwaarden waarop je zoekt.
+
+    pool.getConnection(function (err, conn) {
+      // Do something with the connection
+      if (err) {
+        logger.error(err.code, err.syscall, err.address, err.port);
+        next({
+          code: 500,
+          message: err.code
+        });
+      }
+      if (conn) {
+        conn.query(sqlStatement, function (err, results, fields) {
+          if (err) {
+            logger.err(err.message);
+            next({
+              code: 409,
+              message: err.message
+            });
+          }
+          if (results) {
+            logger.info('Found', results.length, 'results');
+            res.status(200).json({
+              code: 200,
+              message: 'Meal getAll endpoint',
+              data: results
+            });
+          }
+        });
         pool.releaseConnection(conn);
       }
     });

@@ -81,7 +81,7 @@ const userController = {
                 next('error: ' + err.message);
             } else {
                 conn.query(
-                    'SELECT COUNT(*) AS count FROM `user`',
+                    'SELECT `id` FROM `user` ORDER BY id DESC LIMIT 1',
                     function (err, results) {
                         if (err) {
                             res.status(500).json({
@@ -90,11 +90,11 @@ const userController = {
                                 data: {},
                             });
                         } else {
-                            const count = results[0].count;
-                            const userId = count + 1;
+                            const lastId = results[0];
+                            const id = lastId.id + 1;
 
                             const user = {
-                                id: userId,
+                                id: id,
                                 firstName: req.body.firstName,
                                 lastName: req.body.lastName,
                                 isActive: 1,
@@ -119,12 +119,41 @@ const userController = {
                                 return true;
                             }
 
+                            function emailValidation(emailAdress) {
+                                const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                const isValidEmail = regEx.test(emailAdress);
+                                if (!isValidEmail) {
+                                    res.status(400).json({
+                                        status: 400,
+                                        message: `${emailAdress} is invalid!`,
+                                        data: {},
+                                    });
+                                    return false;
+                                }
+                                return true;
+                            }
+        
+                            function passwordValidation(password) {
+                                const regEx = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+                                const validPassword = regEx.test(password);
+                                if (!validPassword) {
+                                    res.status(400).json({
+                                        status: 400,
+                                        message: `${password} is invalid!`,
+                                        data: {},
+                                    });
+                                    return false; // Add this line to exit the function
+                                }
+                                return true;
+                            }
+        
                             if (
                                 !validateField('firstName', 'string', user.firstName) ||
                                 !validateField('lastName', 'string', user.lastName) ||
                                 !validateField('emailAdress', 'string', user.emailAdress) ||
                                 !validateField('password', 'string', user.password) ||
-                                !validateField('phoneNumber', 'string', user.phoneNumber)
+                                !emailValidation(user.emailAdress) ||
+                                !passwordValidation(user.password)
                             ) {
                                 return;
                             }
@@ -153,7 +182,7 @@ const userController = {
                                         logger.info('results: ', results); // results contains rows returned by server
                                         res.status(200).json({
                                             status: 200,
-                                            message: 'User added with id ' + user.id,
+                                            message: 'User added with id ' + id,
                                             data: user,
                                         });
                                     }
@@ -252,12 +281,41 @@ const userController = {
                 return true;
             }
 
-            if (!validateField('firstName', 'string', user.firstName) ||
+            function emailValidation(emailAdress) {
+                const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const isValidEmail = regEx.test(emailAdress);
+                if (!isValidEmail) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${emailAdress} is invalid!`,
+                        data: {},
+                    });
+                    return false;
+                }
+                return true;
+            }
+
+            function passwordValidation(password) {
+                const regEx = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+                const validPassword = regEx.test(password);
+                if (!validPassword) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${password} is invalid!`,
+                        data: {},
+                    });
+                    return false; // Add this line to exit the function
+                }
+                return true;
+            }
+
+            if (
+                !validateField('firstName', 'string', user.firstName) ||
                 !validateField('lastName', 'string', user.lastName) ||
-                !validateField('email', 'string', user.emailAdress) ||
+                !validateField('emailAdress', 'string', user.emailAdress) ||
                 !validateField('password', 'string', user.password) ||
-                !validateField('phoneNumber', 'string', user.phoneNumber) ||
-                !validateField('isActive', 'number', user.isActive)
+                !emailValidation(user.emailAdress) ||
+                !passwordValidation(user.password)
             ) {
                 return;
             }
@@ -325,6 +383,4 @@ const userController = {
     }
 }
 
-//wachtwoord: minstens 1 cijfer, 1 hoofdletter, 8 chars
-//email: n.lastname@domain.com -> 1 of meer letters voor @, 2 of meer letters na @, 2 of 3 na .
 module.exports = userController;

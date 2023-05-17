@@ -5,16 +5,17 @@ const authController = require('../controllers/authentication.controller');
 
 // Hier werk je de routes uit.
 
-// UC-301 Registreren als nieuwe meal
+// UC-301 Create nieuwe meal
 router.post('', mealController.createMeal);
 
-//UC-302 Updaten meal
+//UC-302 Updaten meal -> niet verplicht
+router.put('', mealController.updateMeal);
 
 // UC-303 Opvragen van overzicht van meals
 router.get('', mealController.getAllMeals);
 
 //UC-304 Get meal by ID
-router.get('/mealId', mealController.getAllMeals);
+router.get('/:mealId', mealController.getAllMeals);
 
 //UC 305 Verwijderen meal
 router.delete('/:mealId', authController.validateToken, mealController.deleteMeal);
