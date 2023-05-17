@@ -18,13 +18,13 @@ router.get(
     userController.getUserProfile
 );
 
-// //UC-204
-// router.get('/:userId', userController.getUser);
+//UC-204
+router.get('/:userId', userController.getUser);
 
-// //UC-205
-// router.put('/:userId', userController.updateUser);
+//UC-205
+router.put('/:userId', userController.updateUser);
 
-// //UC-206
-// router.delete('/:userId', userController.deleteUser);
+//UC-206
+router.delete('/:userId', userController.deleteUser);
 
 module.exports = router;
