@@ -3,6 +3,7 @@ const assert = require('assert');
 const pool = require('../util/mysql-db');
 
 const mealController = {
+  // UC-301 Create nieuwe meal
   createMeal: (req, res, next) => {
     const userId = req.userId;
     logger.info('Create new meal, cookId: ' + cookId);
@@ -13,12 +14,12 @@ const mealController = {
 
     // Hier zie je hoe je binnenkomende meal info kunt valideren.
     try {
-      // assert(user === {}, 'Userinfo is missing');
+      assert(user === {}, 'Userinfo is missing');
       assert(typeof meal.name === 'string', 'firstName must be a string');
-      // assert(
-      //   typeof user.emailAdress === 'string',
-      //   'emailAddress must be a string'
-      // );
+      assert(
+        typeof user.emailAdress === 'string',
+        'emailAddress must be a string'
+      );
     } catch (err) {
       logger.warn(err.message.toString());
       // Als één van de asserts failt sturen we een error response.
@@ -65,8 +66,8 @@ const mealController = {
 
               res.status(200).json({
                 code: 200,
-                message: 'Get Meal profile',
-                data: { id: results.insertId, ...meal }
+                message: 'Meal created',
+                data: { meal }
               });
             }
           });
@@ -75,10 +76,12 @@ const mealController = {
     });
   },
 
-  updateMeal: (req, res, next) => {
+  // Niet verplicht!
+  // UC-302 Updaten meal 
+  // updateMeal: (req, res, next) => {
+  // },
 
-  },
-
+  // UC-303 Opvragen van overzicht van meals
   getAllMeals: (req, res, next) => {
     logger.info('Get all meals');
 
@@ -117,6 +120,48 @@ const mealController = {
     });
   },
 
+  //UC 304 Opvragen meal
+  getMeal: (req, res, next) => {
+    logger.info('Get  meal');
+
+    const mealId = parseInt(req.params.mealId);
+
+    let sqlStatement = 'SELECT * FROM `meal` WHERE id = ? ';
+    // Hier wil je misschien iets doen met mogelijke filterwaarden waarop je zoekt.
+
+    pool.getConnection(function (err, conn) {
+      // Do something with the connection
+      if (err) {
+        logger.error(err.code, err.syscall, err.address, err.port);
+        next({
+          code: 500,
+          message: err.code
+        });
+      }
+      if (conn) {
+        conn.query(sqlStatement, [mealId], function (err, results, fields) {
+          if (err) {
+            logger.err(err.message);
+            next({
+              code: 409,
+              message: err.message
+            });
+          }
+          if (results) {
+            logger.info('Found', results.length, 'results');
+            res.status(200).json({
+              code: 200,
+              message: 'Meal get by id endpoint',
+              data: results
+            });
+          }
+        });
+        pool.releaseConnection(conn);
+      }
+    });
+  },
+
+  //UC 305 Verwijderen meal
   deleteMeal: (req, res, next) => {
     const mealId = req.params.mealId
     const userId = req.userId

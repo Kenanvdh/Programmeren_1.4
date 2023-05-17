@@ -3,19 +3,17 @@ const router = express.Router();
 const mealController = require('../controllers/meal.controller');
 const authController = require('../controllers/authentication.controller');
 
-// Hier werk je de routes uit.
-
 // UC-301 Create nieuwe meal
 router.post('', mealController.createMeal);
 
 //UC-302 Updaten meal -> niet verplicht
-router.put('', mealController.updateMeal);
+// router.put('/:mealId', mealController.updateMeal);
 
 // UC-303 Opvragen van overzicht van meals
 router.get('', mealController.getAllMeals);
 
 //UC-304 Get meal by ID
-router.get('/:mealId', mealController.getAllMeals);
+router.get('/:mealId', mealController.getMeal);
 
 //UC 305 Verwijderen meal
 router.delete('/:mealId', authController.validateToken, mealController.deleteMeal);
