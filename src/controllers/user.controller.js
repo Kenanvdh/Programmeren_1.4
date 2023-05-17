@@ -65,7 +65,7 @@ const userController = {
                         res.status(200).json({
                             code: 200,
                             message: 'Get User profile',
-                            data: results[0]
+                            data: results
                         });
                     }
                 });
