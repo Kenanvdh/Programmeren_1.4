@@ -175,7 +175,7 @@ const userController = {
 
         pool.getConnection(function (err, conn) {
             if (err) {
-                console.log('error');
+                console.log(err);
             }
             if (conn) {
                 conn.query('SELECT * FROM `user` WHERE `id` = ?', [userId], // use `?` as a placeholder
