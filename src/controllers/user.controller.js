@@ -10,7 +10,7 @@ const userController = {
 
         pool.getConnection(function (err, conn) {
             if (err) {
-                console.log('error');
+                console.log('Error: ' + err);
             }
             if (conn) {
                 conn.query('SELECT * FROM `user` ',
