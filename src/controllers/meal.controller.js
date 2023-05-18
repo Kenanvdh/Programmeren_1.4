@@ -121,7 +121,7 @@ const mealController = {
                       message: "Meal created",
                       data: {
                         meal: { mealId, ...meal },
-                        },
+                      },
                     });
                   }
                 }
@@ -134,10 +134,106 @@ const mealController = {
     });
   },
 
-  // Niet verplicht!
   // UC-302 Updaten meal 
-  // updateMeal: (req, res, next) => {
-  // },
+  updateMeal: (req, res, next) => {
+    const meal = req.body; 
+    const mealId = req.params.mealId;
+    const userId = req.userId;
+    logger.info("Update meal by id =", mealId, "by user", userId);
+
+    try {
+      assert(typeof req.body.isActive === "number", "isActive must be a number");
+      assert(typeof req.body.isVega === "number", "isVega must be a number");
+      assert(typeof req.body.isVegan === "number", "Description must be a number");
+      assert(
+        typeof req.body.isToTakeHome === "number",
+        "isToTakeHome must be a number"
+      );
+      assert(
+        typeof req.body.maxAmountOfParticipants === "number",
+        "maxAmountOfParticipants must be a number"
+      );
+      assert(typeof req.body.price === "string", "Price must be a string");
+      assert(typeof req.body.imageUrl === "string", "imageUrl must be a string");
+      assert(typeof req.body.name === "string", "name must be a string");
+      assert(
+        typeof req.body.description === "string",
+        "Description must be a string"
+      );
+      assert(
+        typeof req.body.allergenes === "string",
+        "Allergenes must be a string"
+      );
+    } catch (err) {
+      logger.warn(err.message.toString());
+      // If any of the assertions fail, send an error response.
+      next({
+        code: 400,
+        message: "Invalid input for one or more fields",
+        data: {},
+      });
+
+      return;
+    }
+
+    let sqlStatement =
+      'UPDATE `meal` SET `isActive`=?, `isVega`=?, `isVegan`=?, `isToTakeHome`=?, `maxAmountOfParticipants`=?, `price`=?, `imageUrl`=?, `name`=?, `description`=?, `allergenes`=? WHERE `id`=? AND `cookId`=?';
+
+    pool.getConnection(function (err, conn) {
+      if (err) {
+        logger.error(err.code, err.syscall, err.address, err.port);
+        next({
+          code: 500,
+          message: err.code,
+        });
+      }
+      if (conn) {
+        conn.query(
+          sqlStatement,
+          [
+            req.body.isActive,
+            req.body.isVega,
+            req.body.isVegan,
+            req.body.isToTakeHome,
+            req.body.maxAmountOfParticipants,
+            req.body.price,
+            req.body.imageUrl,
+            req.body.name,
+            req.body.description,
+            req.body.allergenes,
+            mealId,
+            userId,
+          ],
+          (err, results, fields) => {
+            if (err) {
+              logger.error(err.message);
+              next({
+                code: 409,
+                message: err.message,
+              });
+            }
+            if (results && results.affectedRows > 0) {
+              logger.trace(results);
+              logger.info("Found", results.length, "results");
+              res.status(200).json({
+                statusCode: 200,
+                message: "Meal with id: " + mealId + " updated",
+                data: { mealId, ...meal }
+              });
+            } else {
+              logger.info("Not authorized to update meal with id: " + mealId);
+              res.status(401).json({
+                statusCode: 401,
+                message: "Not authorized to update meal with id: " + mealId,
+                data: results,
+              });
+            }
+          }
+        );
+        pool.releaseConnection(conn);
+      }
+    });
+  },
 
   // UC-303 Opvragen van overzicht van meals
   getAllMeals: (req, res, next) => {

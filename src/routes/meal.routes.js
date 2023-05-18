@@ -7,7 +7,7 @@ const authController = require('../controllers/authentication.controller');
 router.post('', authController.validateToken, mealController.createMeal);
 
 //UC-302 Updaten meal -> niet verplicht
-// router.put('/:mealId', mealController.updateMeal);
+router.put('/:mealId', authController.validateToken, mealController.updateMeal);
 
 // UC-303 Opvragen van overzicht van meals
 router.get('', mealController.getAllMeals);
