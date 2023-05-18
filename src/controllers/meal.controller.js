@@ -6,19 +6,55 @@ const mealController = {
   // UC-301 Create nieuwe meal
   createMeal: (req, res, next) => {
     const userId = req.userId;
+    var currentDate = new Date();
+    var dateTime = currentDate.toISOString();
+
     logger.info('Create new meal, userId: ' + userId);
 
-    // De usergegevens zijn meegestuurd in de request body.
+    // De mealgegevens zijn meegestuurd in de request body.
     const meal = req.body;
     logger.trace('meal = ', meal);
 
-    // Hier zie je hoe je binnenkomende meal info kunt valideren.
+    // Hier kan je binnenkomende meal info kunt valideren.
     try {
-      assert(user === {}, 'Userinfo is missing');
-      assert(typeof meal.name === 'string', 'firstName must be a string');
       assert(
-        typeof user.emailAdress === 'string',
-        'emailAddress must be a string'
+        typeof meal.isActive === 'number',
+        'isActive must be a number'
+      );
+      assert(
+        typeof meal.isVega === 'number',
+        'isVega must be a number'
+      );
+      assert(
+        typeof meal.isVegan === 'number',
+        'Description must be a number'
+      );
+      assert(
+        typeof meal.isToTakeHome === 'number',
+        'isToTakeHome must be a number'
+      );
+      assert(
+        typeof meal.maxAmountOfParticipants === 'number',
+        'maxAmountOfParticipants must be a number'
+      );
+      assert(
+        typeof meal.price === 'string',
+        'Price must be a string'
+      );
+      assert(
+        typeof meal.imageUrl === 'string',
+        'imageUrl must be a string'
+      );
+      assert(
+        typeof meal.name === 'string',
+        'name must be a string');
+      assert(
+        typeof meal.description === 'string',
+        'Description must be a string'
+      );
+      assert(
+        typeof meal.allergenes === 'string',
+        'Allergenes must be a string'
       );
     } catch (err) {
       logger.warn(err.message.toString());
@@ -38,9 +74,8 @@ const mealController = {
      * De rest van deze functie maak je zelf af!
      * Voor tips, zie de PDF van de les over authenticatie.
      */
-    let sqlStatement = 'INSERT INTO `meal` (`isVega`, `isVegan`, `isToTakeHome`, `dateTime`, `maxAmountOfParticipants`, `price`, `imageUrl`, `name`, `description`, `allergenes`) VALUES' +
-      "( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); " +
-      'Select * FROM user WHERE id=?'
+    let sqlStatement = 'INSERT INTO `meal` (`isActive`, `isVega`, `isVegan`, `isToTakeHome`, `dateTime`, `maxAmountOfParticipants`, `price`, `imageUrl`,  `name`, `description`, `allergenes`, cookId) VALUES' +
+      "( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ); "
 
     pool.getConnection(function (err, conn) {
       // Do something with the connection
@@ -52,25 +87,48 @@ const mealController = {
         });
       }
       if (conn) {
-        conn.query(sqlStatement, [meal.isVega, meal.isVegan, meal.isToTakeHome, meal.dateTime, meal.maxAmountofParticiapnts, meal.price, meal.imageUrl, meal.name, meal.description, meal.allergenes, userId],
+        conn.query(sqlStatement, [meal.isActive, meal.isVega, meal.isVegan, meal.isToTakeHome, dateTime, meal.maxAmountOfParticipants, meal.price, meal.imageUrl, meal.name, meal.description, meal.allergenes, userId],
           (err, results, fields) => {
             if (err) {
               logger.error(err.message);
               next({
                 code: 409,
-                message: err.message
+                message: err.message,
               });
             }
             if (results) {
-              logger.trace('Meal succesfully added, id: ', results[0].insertId);
+              const mealId = results.insertId;
+              logger.trace("Meal successfully added, id: ", mealId);
 
-              res.status(200).json({
-                code: 200,
-                message: 'Meal created',
-                data: { meal }
-              });
+              // Retrieve the user details separately
+              const sqlUserStatement = "SELECT * FROM user WHERE id=?";
+              conn.query(
+                sqlUserStatement,
+                [userId],
+                (err, userResults, fields) => {
+                  if (err) {
+                    logger.error(err.message);
+                    next({
+                      code: 409,
+                      message: err.message,
+                    });
+                  }
+                  if (userResults && userResults.length > 0) {
+                    const user = userResults[0];
+
+                    res.status(200).json({
+                      code: 200,
+                      message: "Meal created",
+                      data: {
+                        meal: { mealId, ...meal },
+                        },
+                    });
+                  }
+                }
+              );
             }
-          });
+          }
+        );
         pool.releaseConnection(conn);
       }
     });
