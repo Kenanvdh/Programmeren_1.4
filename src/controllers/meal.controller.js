@@ -349,11 +349,11 @@ const mealController = {
             })
           } else {
             logger.info('Something went wrong');
-            next({
-              code: 401,
-              message: 'Not authorized',
-              data: {}
-            })
+            res.status(401).json({
+              statusCode: 401,
+              message: "Not authorized to delete meal with id: " + mealId,
+              data: results,
+            });
           }
         });
         pool.releaseConnection(conn);
