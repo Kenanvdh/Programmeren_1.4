@@ -4,7 +4,7 @@ const mealController = require('../controllers/meal.controller');
 const authController = require('../controllers/authentication.controller');
 
 // UC-301 Create nieuwe meal
-router.post('', mealController.createMeal);
+router.post('', authController.validateToken, mealController.createMeal);
 
 //UC-302 Updaten meal -> niet verplicht
 // router.put('/:mealId', mealController.updateMeal);

@@ -6,7 +6,7 @@ const mealController = {
   // UC-301 Create nieuwe meal
   createMeal: (req, res, next) => {
     const userId = req.userId;
-    logger.info('Create new meal, cookId: ' + cookId);
+    logger.info('Create new meal, userId: ' + userId);
 
     // De usergegevens zijn meegestuurd in de request body.
     const meal = req.body;
@@ -25,7 +25,7 @@ const mealController = {
       // Als één van de asserts failt sturen we een error response.
       next({
         code: 400,
-        message: err.message.toString(),
+        message: 'Foute invoer van een of meerdere velden',
         data: {}
       });
 
@@ -38,8 +38,8 @@ const mealController = {
      * De rest van deze functie maak je zelf af!
      * Voor tips, zie de PDF van de les over authenticatie.
      */
-    let sqlStatement = 'INSERT INTO `meal` (`name`, `description`, `imageUrl`, `dateTime`, `maxAmountOfParticipants`, `price`, `cookId`) VALUES' +
-      "( ?, ?, ?, ?, ?, ?, ?); " +
+    let sqlStatement = 'INSERT INTO `meal` (`isVega`, `isVegan`, `isToTakeHome`, `dateTime`, `maxAmountOfParticipants`, `price`, `imageUrl`, `name`, `description`, `allergenes`) VALUES' +
+      "( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); " +
       'Select * FROM user WHERE id=?'
 
     pool.getConnection(function (err, conn) {
@@ -52,7 +52,7 @@ const mealController = {
         });
       }
       if (conn) {
-        conn.query(sqlStatement, [meal.name, meal.description, meal.imageUrl, meal.dateTime, meal.maxAmountofParticiapnts, meal.price, userId, userId],
+        conn.query(sqlStatement, [meal.isVega, meal.isVegan, meal.isToTakeHome, meal.dateTime, meal.maxAmountofParticiapnts, meal.price, meal.imageUrl, meal.name, meal.description, meal.allergenes, userId],
           (err, results, fields) => {
             if (err) {
               logger.error(err.message);
@@ -165,11 +165,10 @@ const mealController = {
   deleteMeal: (req, res, next) => {
     const mealId = req.params.mealId
     const userId = req.userId
-    logger.trace('Deleting meal id = ', mealId, ' by user id = ', userId)
 
-    let sqlStatement = 'DELETE FROM  `meal` WHERE id=? AND cookId=?' +
-      "( ?, ?, ?, ?, ?, ?, ?); " +
-      'Select * FROM user WHERE id=?'
+    logger.trace('Deleting meal id' + mealId + 'by user' + userId)
+    let sqlStatement = 'DELETE FROM `meal` WHERE id=? AND cookId=? '
+
 
     pool.getConnection(function (err, conn) {
       // Do something with the connection
@@ -181,31 +180,29 @@ const mealController = {
         });
       }
       if (conn) {
-        conn.query(sqlStatement, [userId, cookId],
-          (err, results, fields) => {
-            if (err) {
-              logger.error(err.message);
-              next({
-                code: 409,
-                message: err.message
-              });
-            }
-            if (results && results.affectedRows === 1) {
-              logger.trace('Results: ', results);
-
-              res.status(200).json({
-                code: 200,
-                message: 'Meal deleted with id: ', mealId,
-                data: { id: results.insertId, ...meal }
-              });
-            } else {
-              next({
-                code: 401,
-                message: 'Not authorized',
-                data: {}
-              })
-            }
-          });
+        conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
+          if (err) {
+            logger.err(err.message);
+            next({
+              code: 409,
+              message: err.message
+            });
+          }
+          if (results && results.affectedRows === 1) {
+            logger.trace('results: ', results);
+            res.status(200).json({
+              code: 200,
+              message: 'Meal deleted with id ' + mealId,
+              data: {}
+            })
+          } else {
+            next({
+              code: 401,
+              message: 'Not authorized',
+              data: {}
+            })
+          }
+        });
         pool.releaseConnection(conn);
       }
     });
