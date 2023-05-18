@@ -348,7 +348,6 @@ const mealController = {
               data: results
             })
           } else {
-            logger.info('Something went wrong');
             res.status(401).json({
               statusCode: 401,
               message: "Not authorized to delete meal with id: " + mealId,
