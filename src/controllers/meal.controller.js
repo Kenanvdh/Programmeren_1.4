@@ -315,19 +315,22 @@ const mealController = {
     const mealId = req.params.mealId
     const userId = req.userId
 
-    logger.trace('Deleting meal id' + mealId + 'by user' + userId)
+    logger.info('Deleting meal id' + mealId + 'by user' + userId)
     let sqlStatement = 'DELETE FROM `meal` WHERE id=? AND cookId=? '
 
 
     pool.getConnection(function (err, conn) {
+      logger.info('Connection made, going onto further action')
+
       // Do something with the connection
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
         next({
-          code: 501,
+          code: 500,
           message: err.code
         });
       }
+      logger.info('No error found, executing query now')
       if (conn) {
         conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
           if (err) {
@@ -337,6 +340,7 @@ const mealController = {
               message: err.message
             });
           }
+          logger.info('No error found in the query execution, checking authorization')
           if (results && results.affectedRows === 1) {
             logger.trace('Results: ', results);
             res.status(200).json({
