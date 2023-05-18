@@ -7,7 +7,9 @@ const mealController = {
   createMeal: (req, res, next) => {
     const userId = req.userId;
     var currentDate = new Date();
-    var dateTime = currentDate.toISOString();
+    var isoDateTime = currentDate.toISOString();
+    var dateTime = isoDateTime.replace('T', ' ').replace('Z', '');
+
     const isActive = 1;
 
     logger.info('Create new meal, userId: ' + userId);
@@ -67,10 +69,6 @@ const mealController = {
       return;
     }
 
-    /**
-     * De rest van deze functie maak je zelf af!
-     * Voor tips, zie de PDF van de les over authenticatie.
-     */
     let sqlStatement = 'INSERT INTO `meal` (`isActive`, `isVega`, `isVegan`, `isToTakeHome`, `dateTime`, `maxAmountOfParticipants`, `price`, `imageUrl`,  `name`, `description`, `allergenes`, cookId) VALUES' +
       "( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ); "
 
