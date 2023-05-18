@@ -8,6 +8,7 @@ const mealController = {
     const userId = req.userId;
     var currentDate = new Date();
     var dateTime = currentDate.toISOString();
+    const isActive = 1;
 
     logger.info('Create new meal, userId: ' + userId);
 
@@ -87,7 +88,7 @@ const mealController = {
         });
       }
       if (conn) {
-        conn.query(sqlStatement, [meal.isActive, meal.isVega, meal.isVegan, meal.isToTakeHome, dateTime, meal.maxAmountOfParticipants, meal.price, meal.imageUrl, meal.name, meal.description, meal.allergenes, userId],
+        conn.query(sqlStatement, [isActive, meal.isVega, meal.isVegan, meal.isToTakeHome, dateTime, meal.maxAmountOfParticipants, meal.price, meal.imageUrl, meal.name, meal.description, meal.allergenes, userId],
           (err, results, fields) => {
             if (err) {
               logger.error(err.message);
