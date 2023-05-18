@@ -131,7 +131,7 @@ const mealController = {
 
   // UC-302 Updaten meal 
   updateMeal: (req, res, next) => {
-    const meal = req.body; 
+    const meal = req.body;
     const mealId = req.params.mealId;
     const userId = req.userId;
     logger.info("Update meal by id =", mealId, "by user", userId);
@@ -324,7 +324,7 @@ const mealController = {
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
         next({
-          code: 500,
+          code: 501,
           message: err.code
         });
       }
@@ -338,7 +338,7 @@ const mealController = {
             });
           }
           if (results && results.affectedRows === 1) {
-            logger.trace('results: ', results);
+            logger.trace('Results: ', results);
             res.status(200).json({
               code: 200,
               message: 'Meal deleted with id ' + mealId,
