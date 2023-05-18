@@ -348,6 +348,7 @@ const mealController = {
               data: results
             })
           } else {
+            logger.info('Something went wrong');
             next({
               code: 401,
               message: 'Not authorized',
