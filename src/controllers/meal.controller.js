@@ -19,10 +19,6 @@ const mealController = {
     // Hier kan je binnenkomende meal info kunt valideren.
     try {
       assert(
-        typeof meal.isActive === 'number',
-        'isActive must be a number'
-      );
-      assert(
         typeof meal.isVega === 'number',
         'isVega must be a number'
       );
