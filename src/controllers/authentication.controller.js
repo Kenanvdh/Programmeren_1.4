@@ -66,13 +66,20 @@ module.exports = {
                                 logger.info('Payload: ', payload)
 
                             });
+                        } else if (results.length === 0) {
+                            next({
+                                code: 404,
+                                message: 'User not found',
+                                data: {}
+                            });
                         } else {
                             //user wel gevonden maar password matcht niet
-                            next({
-                                code: 401,
+                            res.status(400).json({
+                                code: 400,
                                 message: 'Not authorized',
-                                data: undefined
+                                data: {}
                             });
+                            next();
                         }
                     }
                 });
@@ -131,10 +138,10 @@ module.exports = {
 
             if (!payload) {
                 logger.info('Invalid token!')
-                next({
+                res.status(401).json({
                     code: 401,
                     message: 'Invalid token!',
-                    data: undefined
+                    data: {}
                 });
             } else {
                 // Store the userId in the request object
