@@ -68,7 +68,6 @@ describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
             })
     });
 
-    //checken op data
     it('TC-204-3 - Gebruiker-ID bestaat', (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
         const userId = 6;

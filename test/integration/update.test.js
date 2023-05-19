@@ -54,7 +54,7 @@ describe("UC-205 Updaten van usergegevens", () => {
             .request(server)
             .put(`/api/user/${userId}`)
             .set("Authorization", "Bearer " + token)
-            .send({ updatedUser })
+            .send(updatedUser)
             .end((err, res) => {
                 assert(err === null)
                 expect(res).to.have.status(400);
@@ -65,28 +65,27 @@ describe("UC-205 Updaten van usergegevens", () => {
             });
     });
 
-    //400 error
-    it.skip('TC-205-2- De gebruiker is niet de eigenaar van de data', (done) => {
+    it('TC-205-2- De gebruiker is niet de eigenaar van de data', (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
         const userId = 7
 
         const updatedUser = {
-            firstName: 'John',
-            lastName: 'Doe',
+            firstName: "Kenan",
+            lastName: "van der Heijden",
             isActive: 1,
-            emailAdress: 'johnnydoe@example.com',
-            password: 'Password123',
-            phoneNumber: '0634567890',
-            roles: 'user',
-            street: '123Straat',
-            city: 'Breda'
+            emailAdress: "kenanvanderheijden@ziggo.nl",
+            password: "Kvdh2912",
+            phoneNumber: "06 72425475",
+            roles: "editor,guest",
+            street: "",
+            city: "Breda"
         };
 
         chai
             .request(server)
             .put(`/api/user/${userId}`)
             .set("Authorization", "Bearer " + token)
-            .send({ updatedUser })
+            .send(updatedUser)
             .end((err, res) => {
                 assert(err === null)
                 expect(res).to.have.status(403);
@@ -128,42 +127,39 @@ describe("UC-205 Updaten van usergegevens", () => {
             });
     });
 
-    //400 error
-    it.skip('TC-205-4- Gebruiker bestaat niet', (done) => {
+    it('TC-205-4- Gebruiker bestaat niet', (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
-        const userId = 5;
-
+        const userId = -1;
         const updatedUser = {
             firstName: 'John',
             lastName: 'Doe',
             isActive: 1,
-            emailAdress: 'johnnydoe@example.com',
+            emailAdress: 'john@test.com',
             password: 'Password123',
-            phoneNumber: '0634567890',
+            phoneNumber: '0638681055',
             roles: 'user',
             street: '123Straat',
             city: 'Breda'
         };
-
         chai
             .request(server)
             .put(`/api/user/${userId}`)
-            .set("Authorization", "Bearer " + token)
-            .send({ updatedUser })
+            .set('Authorization', 'Bearer ' + token)
+            .send(updatedUser)
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(404);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('User not found');
+                assert(err === null);
+                const { data, message, status } = res.body;
+                expect(status).to.equal(404);
+                expect(message).to.equal('User not found');
+                expect(data).to.be.an("object").that.is.empty
                 done();
             });
     });
-
+    
     it('TC-205-5- Niet ingelogd', (done) => {
         const token = "";
         const userId = 123;
-        const requestBody = {
+        const updatedUser = {
             firstName: "John",
             lastName: "Doe",
             isActive: 1,
@@ -179,7 +175,7 @@ describe("UC-205 Updaten van usergegevens", () => {
             .request(server)
             .put(`/api/user/${userId}`)
             .set("Authorization", `Bearer ${token}`)
-            .send(requestBody)
+            .send(updatedUser)
             .end((err, res) => {
                 assert(err === null);
                 expect(res).to.have.status(401);
@@ -190,17 +186,17 @@ describe("UC-205 Updaten van usergegevens", () => {
             });
     });
 
-    //400 error
-    it.skip('TC-205-6- Gebruiker succesvol gewijzigd', (done) => {
+    it('TC-205-6- Gebruiker succesvol gewijzigd', (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
         const userId = 6
+       
         const updatedUser = {
             firstName: 'John',
             lastName: 'Doe',
-            isActive: true,
-            emailAdress: '', // Empty email field
-            password: 'password123',
-            phoneNumber: '1234567890',
+            isActive: 1,
+            emailAdress: 'john@test.com',
+            password: 'Password123',
+            phoneNumber: '0638681055',
             roles: 'user',
             street: '123Straat',
             city: 'Breda'
@@ -210,12 +206,11 @@ describe("UC-205 Updaten van usergegevens", () => {
             .request(server)
             .put(`/api/user/${userId}`)
             .set("Authorization", "Bearer " + token)
-            .send({ updatedUser })
+            .send(updatedUser)
             .end((err, res) => {
                 assert(err === null)
                 expect(res).to.have.status(200);
                 expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
                 expect(res.body.message).to.contain('User updated with id');
                 done();
             });

@@ -72,9 +72,10 @@ const userController = {
                             (key) => key !== "isActive" && key !== "roles"
                         )
                     ) {
-                        next({
-                            code: 400,
+                        res.status(200).json({
+                            status: 200,
                             message: "Invalid filter(s) used",
+                            data: {}
                         });
                     } else {
                         res.status(200).json({
@@ -88,7 +89,6 @@ const userController = {
             );
         });
     },
-
 
     getUserProfile: (req, res, next) => {
         logger.info('Get user profile for user', req.userId);
@@ -374,7 +374,6 @@ const userController = {
                         });
                         return false;
                     }
-
                     return true;
                 }
 
@@ -401,7 +400,7 @@ const userController = {
                             message: `${password} is invalid`,
                             data: {},
                         });
-                        return false; // Add this line to exit the function
+                        return false;
                     }
                     return true;
                 }
@@ -415,7 +414,7 @@ const userController = {
                             message: `${phoneNumber} is invalid`,
                             data: {},
                         });
-                        return false; // Add this line to exit the function
+                        return false;
                     }
                     return true;
                 }
@@ -441,6 +440,7 @@ const userController = {
                                 message: err.sqlMessage,
                                 data: {}
                             });
+                            conn.release();
                             return;
                         }
 
@@ -450,8 +450,10 @@ const userController = {
                                 message: 'User not found',
                                 data: {}
                             });
+                            conn.release();
                             return;
                         }
+
                         // Check if the logged-in user is trying to update their own profile
                         if (loggedInUserId !== userId) {
                             res.status(403).json({
@@ -459,6 +461,7 @@ const userController = {
                                 message: 'You cannot update someone elses info.',
                                 data: {},
                             });
+                            conn.release();
                             return;
                         }
 
@@ -472,6 +475,7 @@ const userController = {
                                         message: err.sqlMessage,
                                         data: {}
                                     });
+                                    conn.release();
                                     return;
                                 }
 
@@ -481,7 +485,7 @@ const userController = {
                                     message: 'User updated with id ' + user.id,
                                     data: user
                                 });
-                                pool.releaseConnection(conn);
+                                conn.release();
                             }
                         );
                     }

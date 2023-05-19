@@ -58,8 +58,8 @@ const mealController = {
     } catch (err) {
       logger.warn(err.message.toString());
       // Als één van de asserts failt sturen we een error response.
-      next({
-        code: 400,
+      res.status(400).json({
+        status: 400,
         message: 'Foute invoer van een of meerdere velden',
         data: {}
       });
@@ -111,8 +111,8 @@ const mealController = {
                   if (userResults && userResults.length > 0) {
                     const user = userResults[0];
 
-                    res.status(200).json({
-                      code: 200,
+                    res.status(201).json({
+                      code: 201,
                       message: "Meal created",
                       data: {
                         meal: { mealId, ...meal },
@@ -312,14 +312,30 @@ const mealController = {
 
   //UC 305 Verwijderen meal
   deleteMeal: (req, res, next) => {
-    const mealId = req.params.mealId
-    const userId = req.userId
+    const userId = req.params.mealId
+    const mealId = req.userId
+    const loggedInUserId = req.cookId
 
     logger.info('Deleting meal id ' + mealId + ' by user ' + userId)
     let sqlStatement = 'DELETE FROM `meal` WHERE id=? AND cookId=? '
 
     pool.getConnection(function (err, conn) {
       logger.info('Connection made, going onto further action')
+
+      const meal = {
+        id: mealId,
+        isActive: req.body.isActive,
+        isVega: req.body.isVega,
+        isVegan: req.body.isVegan,
+        isToTakeHome: req.body.isToTakeHome,
+        maxAmountOfParticipants: req.body.maxAmountOfParticipants,
+        price: req.body.price,
+        imageUrl: req.body.imageUrl,
+        cookId: userId,
+        name: req.body.name,
+        description: req.body.description,
+        allergenes: req.body.allergenes
+      }
 
       // Do something with the connection
       if (err) {
@@ -331,31 +347,63 @@ const mealController = {
       }
       logger.info('No error found, executing query now')
       if (conn) {
-        conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
-          if (err) {
-            logger.err(err.message);
-            next({
-              code: 409,
-              message: err.message
+        conn.query(
+          'SELECT * FROM `meal` WHERE `id` = ?',
+          [meal.id],
+          function (err, results) {
+            if (err) {
+              res.status(500).json({
+                status: 500,
+                message: err.sqlMessage,
+                data: {}
+              });
+              return;
+            }
+
+            if (results.length === 0) {
+              res.status(404).json({
+                status: 404,
+                message: 'Meal not found',
+                data: {}
+              });
+              return;
+            }
+            // Check if the logged-in user is trying to update their own profile
+            if (loggedInUserId !== userId) {
+              res.status(403).json({
+                status: 403,
+                message: 'You cannot update someone elses info.',
+                data: {},
+              });
+              return;
+            }
+            conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
+              if (err) {
+                logger.err(err.message);
+                next({
+                  code: 409,
+                  message: err.message
+                });
+              }
+              logger.info('No error found in the query execution, checking authorization')
+              if (results && results.affectedRows === 1) {
+                logger.info('Results: ', results);
+                res.status(200).json({
+                  code: 200,
+                  message: 'Meal deleted with id ' + mealId,
+                  data: results
+                })
+              } else {
+                res.status(401).json({
+                  statusCode: 401,
+                  message: "Not authorized to delete meal with id: " + mealId,
+                  data: results,
+                });
+              }
             });
+            pool.releaseConnection(conn);
           }
-          logger.info('No error found in the query execution, checking authorization')
-          if (results && results.affectedRows === 1) {
-            logger.info('Results: ', results);
-            res.status(200).json({
-              code: 200,
-              message: 'Meal deleted with id ' + mealId,
-              data: results
-            })
-          } else {
-            res.status(401).json({
-              statusCode: 401,
-              message: "Not authorized to delete meal with id: " + mealId,
-              data: results,
-            });
-          }
-        });
-        pool.releaseConnection(conn);
+        )
       }
     });
   }

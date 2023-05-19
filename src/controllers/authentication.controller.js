@@ -64,10 +64,10 @@ module.exports = {
                                     });
                                 }
                                 logger.info('Payload: ', payload)
-
+                                next()
                             });
                         } else if (results.length === 0) {
-                            next({
+                            res.status(404).json({
                                 code: 404,
                                 message: 'User not found',
                                 data: {}
@@ -124,7 +124,7 @@ module.exports = {
             next({
                 code: 401,
                 message: 'Authorization header missing!',
-                data: undefined
+                data: {}
             });
         } else {
             /**

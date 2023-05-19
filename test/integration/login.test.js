@@ -10,6 +10,7 @@ const { jwtSecretKey, logger } = require("../../src/util/utils");
 require("tracer").setLevel("trace");
 
 chai.should();
+const expect = chai.expect;
 chai.use(chaiHttp);
 
 const CLEAR_MEAL_TABLE = "DELETE IGNORE FROM meal;";
@@ -74,12 +75,11 @@ describe("UC 101 - inloggen", () => {
             });
     });
 
-    //500 error
-    it.skip("TC-101-3 - Gebruiker bestaat niet", (done) => {
+    it("TC-101-3 - gebruiker bestaat niet", (done) => {
         chai
             .request(server)
             .post("/api/login")
-            .send({ emailAdress: "henk@example.com", password: "Wachtwoord12" })
+            .send({ emailAdress: "j.doe@example.com", password: "Welkom123" })
             .end((err, res) => {
                 assert(err === null);
                 const { body } = res;

@@ -10,6 +10,7 @@ const { jwtSecretKey, logger } = require("../../src/util/utils");
 require("tracer").setLevel("trace");
 
 chai.should();
+const expect = chai.expect;
 chai.use(chaiHttp);
 
 const CLEAR_MEAL_TABLE = "DELETE IGNORE FROM meal;";
@@ -35,10 +36,74 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
         });
     });
 
-    it.skip('TC-202-1 - Useroverview shown', (done) => {
+    it('TC-202-1 - Toon alle gebruikers (minimaal 2)', (done) => {
         chai
             .request(server)
             .get('/api/user')
+            .end((err, res) => {
+                assert(err === null)
+                let { status, message, data } = res.body
+                expect(status).to.equal(200)
+                expect(message).to.equal('User getAll endpoint')
+                expect(data).to.be.an('array')
+                expect(data.length).to.be.at.least(2)
+                done()
+            })
+    })   
+    
+    it('TC-202-2 - Toon gebruikers met zoekterm op niet-bestaande velden', (done) => {
+        const filter = "password";
+        chai
+            .request(server)
+            .get(`/api/user?${filter}`)
+            .end((err, res) => {
+                assert(err === null)
+                let { status, message, data } = res.body
+                expect(status).to.equal(200)
+                expect(message).to.equal('Invalid filter(s) used')
+                expect(data).to.be.an('object')
+                expect(data).to.be.empty
+                done()
+            })
+    })
+
+    it('TC-202-3 - Toon gebruikers met gebruik van de zoekterm op het veld isActive=false', (done) => {
+        const filter = "isActive=false";
+        chai
+            .request(server)
+            .get(`/api/user?${filter}`)
+            .end((err, res) => {
+                assert(err === null)
+                let { status, message, data } = res.body
+                expect(status).to.equal(200)
+                expect(message).to.equal('User getAll endpoint')
+                expect(data).to.be.an('array')
+                expect(data).to.be.empty
+                done()
+            })
+    })
+
+    it('TC-202-4 - Toon gebruikers met gebruik van de zoekterm op het veld isActive=true', (done) => {
+        const filter = "isActive=true";
+        chai
+            .request(server)
+            .get(`/api/user?${filter}`)
+            .end((err, res) => {
+                assert(err === null)
+                let { status, message, data } = res.body
+                expect(status).to.equal(200)
+                expect(message).to.equal('User getAll endpoint')
+                expect(data).to.be.an('array')
+                expect(data.length).to.be.at.least(2)
+                done()
+            })
+    })
+
+    it('TC-202-5 - Toon gebruikers met zoektermen op bestaande velden (maximaal op 2 velden filteren)', (done) => {
+        chai
+            .request(server)
+            .get(`/api/user`)
+            .query({isActive:'true'})
             .end((err, res) => {
                 assert(err === null)
                 let { status, message, data } = res.body
