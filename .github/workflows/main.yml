@@ -42,17 +42,3 @@ jobs:
       - name: npm test
         run: |
           npm test -- --DB_PASSWORD {{env.MYSQL_ROOT_PASSWORD}} --DB_USER root --DB_NAME ${{env.DB_DATABASE}}
-
-  deploy:
-    name: Wait for Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Render Deployment
-        uses: bounceapp/render-action@0.6.0
-        with:
-          render-token: ${{ secrets.RENDER_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          service-id: srv-xxxxxxxxxxxxxxxxxxxx
-          retries: 20
-          wait: 16000
-          sleep: 30000
