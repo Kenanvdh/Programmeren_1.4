@@ -21,8 +21,8 @@ const CLEAR_DB =
 
 const INSERT_USER =
     "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city) " +
-    "VALUES (6, 'john', 'doe', 1, 'johan.doe@example.com', 'Welkom123', 123901272, 'admin', 'Dorpsstraatstraat', 'Breda'), " +
-    "(7, 'jane', 'smith', 1, 'jane.smith@example.com', 'Password123', 987654321, 'user', '42 avenue', 'New York') ";
+    "VALUES (6, 'John', 'deere', 1, 'john.deere@example.com', 'Password12', 0634567890, 'admin', 'dorpsstraat', 'Breda'), (7, 'john', 'doe', 1, 'john.doe@example.com', 'Password12', 0612345678, 'guest', 'Straat 12', 'Nur Sultan')";
+
 
 describe("UC 101 - inloggen", () => {
     before((done) => {
@@ -60,7 +60,7 @@ describe("UC 101 - inloggen", () => {
         chai
             .request(server)
             .post("/api/login")
-            .send({ emailAdress: "johan.doe@example.com", password: "password12" })
+            .send({ emailAdress: "john.doe@example.com", password: "password12" })
             .end((err, res) => {
                 assert(err === null);
                 const { body } = res;
@@ -99,8 +99,8 @@ describe("UC 101 - inloggen", () => {
             .request(server)
             .post("/api/login")
             .send({
-                emailAdress: "johan.doe@example.com",
-                password: "Welkom123",
+                emailAdress: "john.doe@example.com",
+                password: "Password12",
             })
             .end((err, res) => {
                 assert(err === null);

@@ -21,8 +21,8 @@ const CLEAR_DB =
 
 const INSERT_USER =
     "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city) " +
-    "VALUES (6, 'john', 'doe', 1, 'johan.doe@example.com', 'Welkom123', 123901272, 'admin', 'Dorpsstraatstraat', 'Breda'), " +
-    "(7, 'jane', 'smith', 1, 'jane.smith@example.com', 'Password123', 987654321, 'user', '42 avenue', 'New York') ";
+    "VALUES (6, 'John', 'deere', 1, 'john.deere@example.com', 'Password12', 0634567890, 'admin', 'dorpsstraat', 'Breda'), (7, 'john', 'doe', 1, 'john.doe@example.com', 'Password12', 0612345678, 'guest', 'Straat 12', 'Nur Sultan')";
+
 
 describe("UC 202 - Opvragen van overzicht van users", () => {
     before((done) => {
@@ -49,8 +49,8 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
                 expect(data.length).to.be.at.least(2)
                 done()
             })
-    })   
-    
+    })
+
     it('TC-202-2 - Toon gebruikers met zoekterm op niet-bestaande velden', (done) => {
         const filter = "password";
         chai
@@ -103,7 +103,7 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
         chai
             .request(server)
             .get(`/api/user`)
-            .query({isActive:'true'})
+            .query({ isActive: 'true' })
             .end((err, res) => {
                 assert(err === null)
                 let { status, message, data } = res.body
