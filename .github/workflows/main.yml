@@ -3,7 +3,7 @@ name: Testing and deployment
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   integrationtests:
@@ -21,7 +21,7 @@ jobs:
         ports:
           - '3306'
     steps:
-      - uses: actions/checkout@main
+      - uses: actions/checkout@master
 
       - name: Start MySQL connection from host
         run: |
