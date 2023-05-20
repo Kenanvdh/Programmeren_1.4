@@ -86,7 +86,7 @@ describe("UC-206 Verwijderen van user", () => {
                 let { data, message, status } = res.body;
 
                 expect(status).to.equal(403);
-                expect(message).to.equal('You cannot update someone elses info.')
+                expect(message).to.equal('You cannot delete someone elses info.')
                 expect(data).to.be.empty;
 
                 done();

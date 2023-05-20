@@ -341,183 +341,95 @@ const userController = {
                 next('error: ' + err.message);
                 return;
             }
-            if (conn) {
-                const user = {
-                    id: userId,
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    isActive: req.body.isActive,
-                    emailAdress: req.body.emailAdress,
-                    password: req.body.password,
-                    phoneNumber: req.body.phoneNumber,
-                    roles: req.body.roles,
-                    street: req.body.street,
-                    city: req.body.city,
-                };
 
-                // Check for missing fields
-                function validateField(fieldName, fieldType, fieldValue) {
-                    if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
-                        res.status(400).json({
-                            status: 400,
-                            message: `${fieldName} is required`,
-                            data: {}
-                        });
-                        return false;
-                    }
+            const user = {
+                id: userId,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                isActive: req.body.isActive,
+                emailAdress: req.body.emailAdress,
+                password: req.body.password,
+                phoneNumber: req.body.phoneNumber,
+                roles: req.body.roles,
+                street: req.body.street,
+                city: req.body.city,
+            };
 
-                    if (typeof fieldValue !== fieldType) {
-                        res.status(400).json({
-                            status: 400,
-                            message: `${fieldName} (${fieldType}) is invalid!`,
-                            data: {}
-                        });
-                        return false;
-                    }
-                    return true;
+            // Check for missing fields
+            function validateField(fieldName, fieldType, fieldValue) {
+                if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${fieldName} is required`,
+                        data: {}
+                    });
+                    return false;
                 }
 
-                function emailValidation(emailAdress) {
-                    const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    const isValidEmail = regEx.test(emailAdress);
-                    if (!isValidEmail) {
-                        res.status(400).json({
-                            status: 400,
-                            message: `${emailAdress} is invalid`,
-                            data: {},
-                        });
-                        return false;
-                    }
-                    return true;
+                if (typeof fieldValue !== fieldType) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${fieldName} (${fieldType}) is invalid!`,
+                        data: {}
+                    });
+                    return false;
                 }
-
-                function passwordValidation(password) {
-                    const regEx = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-                    const validPassword = regEx.test(password);
-                    if (!validPassword) {
-                        res.status(400).json({
-                            status: 400,
-                            message: `${password} is invalid`,
-                            data: {},
-                        });
-                        return false;
-                    }
-                    return true;
-                }
-
-                function phoneNumberValidation(phoneNumber) {
-                    const regEx = /^06(\s|-)?\d{8}$/;
-                    const validPhoneNumber = regEx.test(phoneNumber);
-                    if (!validPhoneNumber) {
-                        res.status(400).json({
-                            status: 400,
-                            message: `${phoneNumber} is invalid`,
-                            data: {},
-                        });
-                        return false;
-                    }
-                    return true;
-                }
-
-                if (
-                    !validateField('firstName', 'string', user.firstName) ||
-                    !validateField('lastName', 'string', user.lastName) ||
-                    !validateField('emailAdress', 'string', user.emailAdress) ||
-                    !validateField('password', 'string', user.password) ||
-                    !emailValidation(user.emailAdress) ||
-                    !passwordValidation(user.password) ||
-                    !phoneNumberValidation(user.phoneNumber)
-                ) {
-                    return;
-                }
-                conn.query(
-                    'SELECT * FROM `user` WHERE `id` = ?',
-                    [user.id],
-                    function (err, results) {
-                        if (err) {
-                            res.status(500).json({
-                                status: 500,
-                                message: err.sqlMessage,
-                                data: {}
-                            });
-                            conn.release();
-                            return;
-                        }
-
-                        if (results.length === 0) {
-                            res.status(404).json({
-                                status: 404,
-                                message: 'User not found',
-                                data: {}
-                            });
-                            conn.release();
-                            return;
-                        }
-
-                        // Check if the logged-in user is trying to update their own profile
-                        if (loggedInUserId !== userId) {
-                            res.status(403).json({
-                                status: 403,
-                                message: 'You cannot update someone elses info.',
-                                data: {},
-                            });
-                            conn.release();
-                            return;
-                        }
-
-                        conn.query(
-                            'UPDATE `user` SET `firstName` = ?, `lastName` = ?, `isActive` = ?, `emailAdress` = ?, `password` = ?, `phoneNumber` = ?, `roles` = ?, `street` = ?, `city` = ? WHERE `id` = ?',
-                            [user.firstName, user.lastName, user.isActive, user.emailAdress, user.password, user.phoneNumber, user.roles, user.street, user.city, user.id],
-                            function (err, results) {
-                                if (err) {
-                                    res.status(500).json({
-                                        status: 500,
-                                        message: err.sqlMessage,
-                                        data: {}
-                                    });
-                                    conn.release();
-                                    return;
-                                }
-
-                                logger.info('results: ', results); // results contains rows affected by server
-                                res.status(200).json({
-                                    status: 200,
-                                    message: 'User updated with id ' + user.id,
-                                    data: user
-                                });
-                                conn.release();
-                            }
-                        );
-                    }
-                );
+                return true;
             }
-        });
-    },
 
-    deleteUser: (req, res, next) => {
-        const method = req.method
-        const loggedInUserId = req.userId; // Logged-in user ID
-        const userId = parseInt(req.params.userId);
+            function emailValidation(emailAdress) {
+                const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const isValidEmail = regEx.test(emailAdress);
+                if (!isValidEmail) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${emailAdress} is invalid`,
+                        data: {},
+                    });
+                    return false;
+                }
+                return true;
+            }
 
-        const user = {
-            id: userId,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            isActive: req.body.isActive,
-            emailAdress: req.body.emailAdress,
-            password: req.body.password,
-            phoneNumber: req.body.phoneNumber,
-            roles: req.body.roles,
-            street: req.body.street,
-            city: req.body.city,
-        };
+            function passwordValidation(password) {
+                const regEx = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+                const validPassword = regEx.test(password);
+                if (!validPassword) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${password} is invalid`,
+                        data: {},
+                    });
+                    return false;
+                }
+                return true;
+            }
 
-        logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
+            function phoneNumberValidation(phoneNumber) {
+                const regEx = /^06(\s|-)?\d{8}$/;
+                const validPhoneNumber = regEx.test(phoneNumber);
+                if (!validPhoneNumber) {
+                    res.status(400).json({
+                        status: 400,
+                        message: `${phoneNumber} is invalid`,
+                        data: {},
+                    });
+                    return false;
+                }
+                return true;
+            }
 
-        pool.getConnection(function (err, conn) {
-            if (err) {
-                console.log('Error')
-                next('Error: ' + err.message)
+            if (
+                !validateField('firstName', 'string', user.firstName) ||
+                !validateField('lastName', 'string', user.lastName) ||
+                !validateField('emailAdress', 'string', user.emailAdress) ||
+                !validateField('password', 'string', user.password) ||
+                !emailValidation(user.emailAdress) ||
+                !passwordValidation(user.password) ||
+                !phoneNumberValidation(user.phoneNumber)
+            ) {
+                conn.release();
+                return;
             }
 
             conn.query(
@@ -530,6 +442,7 @@ const userController = {
                             message: err.sqlMessage,
                             data: {}
                         });
+                        conn.release();
                         return;
                     }
 
@@ -539,8 +452,10 @@ const userController = {
                             message: 'User not found',
                             data: {}
                         });
+                        conn.release();
                         return;
                     }
+
                     // Check if the logged-in user is trying to update their own profile
                     if (loggedInUserId !== userId) {
                         res.status(403).json({
@@ -548,34 +463,111 @@ const userController = {
                             message: 'You cannot update someone elses info.',
                             data: {},
                         });
+                        conn.release();
                         return;
                     }
 
-                    if (conn) {
-                        conn.query('DELETE FROM `user` WHERE `id` = ? ', [userId],
-                            function (err, results) {
-                                if (err) {
-                                    res.status(500).json(
-                                        {
-                                            status: 500,
-                                            message: err.sqlMessage,
-                                            data: {}
-                                        });
-                                    return;
-                                }
-                                res.status(200).json(
-                                    {
-                                        status: 200,
-                                        message: 'User deleted met ID ' + userId,
-                                        data: results
-                                    });
+                    conn.query(
+                        'UPDATE `user` SET `firstName` = ?, `lastName` = ?, `isActive` = ?, `emailAdress` = ?, `password` = ?, `phoneNumber` = ?, `roles` = ?, `street` = ?, `city` = ? WHERE `id` = ?',
+                        [user.firstName, user.lastName, user.isActive, user.emailAdress, user.password, user.phoneNumber, user.roles, user.street, user.city, user.id],
+                        function (err, results) {
+                            if (err) {
+                                res.status(500).json({
+                                    status: 500,
+                                    message: err.sqlMessage,
+                                    data: {}
+                                });
+                                conn.release();
+                                return;
                             }
-                        );
+
+                            logger.info('results: ', results); // results contains rows affected by server
+                            res.status(200).json({
+                                status: 200,
+                                message: 'User updated with id ' + user.id,
+                                data: user
+                            });
+                            conn.release();
+                        }
+                    );
+                }
+            );
+        });
+    },
+
+    deleteUser: (req, res, next) => {
+        const loggedInUserId = req.userId; // Logged-in user ID
+        const userId = parseInt(req.params.userId);
+
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                console.log('error');
+                next('error: ' + err.message);
+                return;
+            }
+
+            conn.query(
+                'SELECT * FROM `user` WHERE `id` = ?',
+                [userId],
+                function (err, results) {
+                    if (err) {
+                        res.status(500).json({
+                            status: 500,
+                            message: err.sqlMessage,
+                            data: {}
+                        });
+                        conn.release();
+                        return;
                     }
-                    pool.releaseConnection;
-                });
-        })
-    }
+
+                    if (results.length === 0) {
+                        res.status(404).json({
+                            status: 404,
+                            message: 'User not found',
+                            data: {}
+                        });
+                        conn.release();
+                        return;
+                    }
+
+                    // Check if the logged-in user is trying to delete their own profile
+                    if (loggedInUserId !== userId) {
+                        res.status(403).json({
+                            status: 403,
+                            message: 'You cannot delete someone elses info.',
+                            data: {},
+                        });
+                        conn.release();
+                        return;
+                    }
+
+                    conn.query(
+                        'DELETE FROM `user` WHERE `id` = ?',
+                        [userId],
+                        function (err, results) {
+                            if (err) {
+                                res.status(500).json({
+                                    status: 500,
+                                    message: err.sqlMessage,
+                                    data: {}
+                                });
+                                conn.release();
+                                return;
+                            }
+
+                            logger.info('results: ', results); // results contains rows affected by server
+                            res.status(200).json({
+                                status: 200,
+                                message: 'User deleted met ID ' + userId,
+                                data: {}
+                            });
+                            conn.release();
+                        }
+                    );
+                }
+            );
+        });
+    },
 }
 
 module.exports = userController;

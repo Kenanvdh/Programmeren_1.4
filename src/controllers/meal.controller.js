@@ -161,28 +161,61 @@ const mealController = {
       );
     } catch (err) {
       logger.warn(err.message.toString());
-      // If any of the assertions fail, send an error response.
-      next({
-        code: 400,
+      res.status(400).json({
+        status: 400,
         message: "Invalid input for one or more fields",
         data: {},
       });
-
       return;
     }
 
-    let sqlStatement =
-      'UPDATE `meal` SET `isActive`=?, `isVega`=?, `isVegan`=?, `isToTakeHome`=?, `maxAmountOfParticipants`=?, `price`=?, `imageUrl`=?, `name`=?, `description`=?, `allergenes`=? WHERE `id`=? AND `cookId`=?';
+    let sqlStatement = `UPDATE meal
+                        SET isActive=?, isVega=?, isVegan=?, isToTakeHome=?,
+                            maxAmountOfParticipants=?, price=?, imageUrl=?,
+                            name=?, description=?, allergenes=?
+                        WHERE id=? AND cookId=?`;
 
-    pool.getConnection(function (err, conn) {
+    pool.getConnection((err, conn) => {
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
         next({
           code: 500,
           message: err.code,
         });
+        return;
       }
-      if (conn) {
+
+      conn.query('SELECT * FROM meal WHERE id = ?', [mealId], (err, results) => {
+        if (err) {
+          conn.release();
+          res.status(500).json({
+            status: 500,
+            message: err.sqlMessage,
+            data: {}
+          });
+          return;
+        }
+
+        if (results.length === 0) {
+          res.status(404).json({
+            status: 404,
+            message: 'Meal niet gevonden',
+            data: {}
+          });
+          return;
+        }
+
+        // Check if the logged-in user is trying to update their own meal
+        if (results[0].cookId !== userId) {
+          conn.release();
+          res.status(403).json({
+            status: 403,
+            message: 'You cannot update someone elses meal-info.',
+            data: {},
+          });
+          return;
+        }
+
         conn.query(
           sqlStatement,
           [
@@ -200,33 +233,35 @@ const mealController = {
             userId,
           ],
           (err, results, fields) => {
+            conn.release();
             if (err) {
               logger.error(err.message);
               next({
                 code: 409,
                 message: err.message,
               });
+              return;
             }
+
             if (results && results.affectedRows > 0) {
               logger.trace(results);
               logger.info("Found", results.length, "results");
               res.status(200).json({
                 statusCode: 200,
-                message: "Meal with id: " + mealId + " updated",
+                message: `Meal updated with id ${mealId} `,
                 data: { mealId, ...meal }
               });
             } else {
-              logger.info("Not authorized to update meal with id: " + mealId);
+              logger.info(`Not authorized to update meal with id ${mealId}`);
               res.status(401).json({
                 statusCode: 401,
-                message: "Not authorized to update meal with id: " + mealId,
+                message: `Not authorized to update meal with id ${mealId}`,
                 data: results,
               });
             }
           }
         );
-        pool.releaseConnection(conn);
-      }
+      });
     });
   },
 
@@ -271,50 +306,59 @@ const mealController = {
 
   //UC 304 Opvragen meal
   getMeal: (req, res, next) => {
-    logger.info('Get  meal');
+    logger.info('Get meal');
 
     const mealId = parseInt(req.params.mealId);
 
-    let sqlStatement = 'SELECT * FROM `meal` WHERE id = ? ';
-    // Hier wil je misschien iets doen met mogelijke filterwaarden waarop je zoekt.
-
-    pool.getConnection(function (err, conn) {
-      // Do something with the connection
+    pool.getConnection((err, conn) => {
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        next({
+        return next({
           code: 500,
           message: err.code
         });
       }
+
       if (conn) {
-        conn.query(sqlStatement, [mealId], function (err, results, fields) {
-          if (err) {
-            logger.err(err.message);
-            next({
-              code: 409,
-              message: err.message
-            });
-          }
-          if (results) {
-            logger.info('Found', results.length, 'results');
+        conn.query(
+          'SELECT * FROM `meal` WHERE `id` = ?',
+          [mealId],
+          (err, results) => {
+            if (err) {
+              conn.release();
+              return res.status(500).json({
+                status: 500,
+                message: err.sqlMessage,
+                data: {}
+              });
+            }
+
+            if (results.length === 0) {
+              conn.release();
+              return res.status(404).json({
+                status: 404,
+                message: 'Meal not found',
+                data: {}
+              });
+            }
+
             res.status(200).json({
-              code: 200,
-              message: 'Meal get by id endpoint',
+              status: 200,
+              message: 'Meal retrieved successfully',
               data: results
             });
+            conn.release();
           }
-        });
-        pool.releaseConnection(conn);
+        );
       }
     });
   },
 
+
   //UC 305 Verwijderen meal
   deleteMeal: (req, res, next) => {
-    const userId = req.params.mealId
-    const mealId = req.userId
-    const loggedInUserId = req.cookId
+    const mealId = req.params.mealId
+    const userId = req.userId
 
     logger.info('Deleting meal id ' + mealId + ' by user ' + userId)
     let sqlStatement = 'DELETE FROM `meal` WHERE id=? AND cookId=? '
@@ -363,13 +407,13 @@ const mealController = {
             if (results.length === 0) {
               res.status(404).json({
                 status: 404,
-                message: 'Meal not found',
+                message: 'Meal niet gevonden',
                 data: {}
               });
               return;
             }
             // Check if the logged-in user is trying to update their own profile
-            if (loggedInUserId !== userId) {
+            if (results[0].cookId !== userId) {
               res.status(403).json({
                 status: 403,
                 message: 'You cannot update someone elses info.',
@@ -377,6 +421,7 @@ const mealController = {
               });
               return;
             }
+
             conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
               if (err) {
                 logger.err(err.message);
