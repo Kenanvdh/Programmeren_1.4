@@ -197,7 +197,7 @@ describe("UC-205 Updaten van usergegevens", () => {
             emailAdress: 'john@test.com',
             password: 'Password123',
             phoneNumber: '0638681055',
-            roles: 'user',
+            roles: 'guest',
             street: '123Straat',
             city: 'Breda'
         };
