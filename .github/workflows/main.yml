@@ -54,7 +54,10 @@ jobs:
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
           ENV_ID: ENV_ID
-        run: render stop --env $ENV_ID
+        run: |
+          render stop \
+            --env $ENV_ID \
+            --engine pug
 
   Render-deploy:
     needs: Render-stop
