@@ -13,11 +13,11 @@ describe('Server-info', function () {
             .request(server)
             .get('/api/info')
             .end((err, res) => {
-                res.body.should.be.an('object')
-                res.body.should.has.property('status').to.be.equal(201)
-                res.body.should.has.property('message')
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect('status').to.be.equal(200)
+                expect('message').to.equal('Server info-endpoint')
                 res.body.should.has.property('data')
-                let { data, message } = res.body
                 data.should.be.an('object')
                 data.should.has.property('studentName').to.be.equal('Kenan')
                 data.should.has.property('studentNumber').to.be.equal(2197280)

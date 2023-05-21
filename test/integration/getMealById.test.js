@@ -81,9 +81,9 @@ describe("UC-304 Opvragen van maaltijd bij ID", () => {
                 expect(data.price).to.equal("15.99");
                 expect(data.imageUrl).to.equal("https://example.com/image1.jpg");
                 expect(data.cookId).to.equal(1);
-                expect(data.createDate).to.equal("2023-05-17T22:00:00.000Z");
+                expect(data.createDate).to.equal("2023-05-18T00:00:00.000Z");
                 expect(data.name).to.equal("Meal 1")
-                expect(data.updateDate).to.equal("2023-05-17T22:00:00.000Z");
+                expect(data.updateDate).to.equal("2023-05-18T00:00:00.000Z");
                 expect(data.description).to.equal("This is the description for Meal 1");
                 expect(data.allergenes).to.equal("lactose");
                 done();
