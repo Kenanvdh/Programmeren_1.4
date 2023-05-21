@@ -187,8 +187,8 @@ const userController = {
         pool.getConnection(function (err, conn) {
             if (err) {
                 logger.error(err);
-                next({
-                    code: 500,
+                res.json(500).json({
+                    status: 500,
                     message: err.code,
                 });
                 return;
@@ -198,7 +198,7 @@ const userController = {
                 function (err, results, fields) {
                     if (err) {
                         logger.error(err.message);
-                        next({
+                        res.status(409).json({
                             code: 409,
                             message: err.message,
                         });
@@ -250,8 +250,8 @@ const userController = {
             // Do something with the connection
             if (err) {
                 logger.error(err.code, err.syscall, err.address, err.port);
-                next({
-                    code: 500,
+                res.status(500).json({
+                    status: 500,
                     message: err.code
                 });
             }
@@ -259,8 +259,8 @@ const userController = {
                 conn.query(sqlStatement, [req.userId], (err, results, fields) => {
                     if (err) {
                         logger.error(err.message);
-                        next({
-                            code: 409,
+                        res.status(409).json({
+                            status: 409,
                             message: err.message
                         });
                     }

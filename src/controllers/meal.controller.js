@@ -76,8 +76,8 @@ const mealController = {
       // Do something with the connection
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        next({
-          code: 500,
+        res.status(500).json({
+          status: 500,
           message: err.code
         });
       }
@@ -86,8 +86,8 @@ const mealController = {
           (err, results, fields) => {
             if (err) {
               logger.error(err.message);
-              next({
-                code: 409,
+              res.status(409)({
+                status: 409,
                 message: err.message,
               });
             }
@@ -103,8 +103,8 @@ const mealController = {
                 (err, userResults, fields) => {
                   if (err) {
                     logger.error(err.message);
-                    next({
-                      code: 409,
+                    res.status(409).json({
+                      status: 409,
                       message: err.message,
                     });
                   }
@@ -178,8 +178,8 @@ const mealController = {
     pool.getConnection((err, conn) => {
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        next({
-          code: 500,
+        res.status(500).json({
+          status: 500,
           message: err.code,
         });
         return;
@@ -236,8 +236,8 @@ const mealController = {
             conn.release();
             if (err) {
               logger.error(err.message);
-              next({
-                code: 409,
+              res.json(409).json({
+                status: 409,
                 message: err.message,
               });
               return;
@@ -276,8 +276,8 @@ const mealController = {
       // Do something with the connection
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        next({
-          code: 500,
+        res.status(500).json({
+          status: 500,
           message: err.code
         });
       }
@@ -285,8 +285,8 @@ const mealController = {
         conn.query(sqlStatement, function (err, results, fields) {
           if (err) {
             logger.err(err.message);
-            next({
-              code: 409,
+            res.status(409).json({
+              status: 409,
               message: err.message
             });
           }
@@ -313,8 +313,8 @@ const mealController = {
     pool.getConnection((err, conn) => {
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        return next({
-          code: 500,
+        return res.status(500).json({
+          status: 500,
           message: err.code
         });
       }
@@ -383,8 +383,8 @@ const mealController = {
       // Do something with the connection
       if (err) {
         logger.error(err.code, err.syscall, err.address, err.port);
-        next({
-          code: 500,
+        res.status(500).json({
+          status: 500,
           message: err.code
         });
       }
@@ -424,7 +424,7 @@ const mealController = {
             conn.query(sqlStatement, [mealId, userId], function (err, results, fields) {
               if (err) {
                 logger.err(err.message);
-                next({
+                res.json(409).json({
                   code: 409,
                   message: err.message
                 });
