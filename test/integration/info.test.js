@@ -18,8 +18,8 @@ describe('Server-info', function () {
             .end((err, res) => {
                 assert(err === null);
                 let { data, message, status } = res.body;
-                expect('status').to.be.equal(200)
-                expect('message').to.equal('Server info-endpoint')
+                expect(status).to.be.equal(200)
+                expect(message).to.equal('Server info-endpoint')
                 res.body.should.has.property('data')
                 data.should.be.an('object')
                 data.should.has.property('studentName').to.be.equal('Kenan')
