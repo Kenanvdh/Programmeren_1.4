@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Render CLI
-        run: npm i -g @render/cli
+        run: npm i render-cli -g 
 
       - name: Deploy server to render
         env: 
