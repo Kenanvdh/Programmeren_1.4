@@ -62,38 +62,38 @@ jobs:
       - name: Verify stop
         run: echo "Server has been stopped"
 
-  Render-deploy:
-    needs: Render-stop
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkoutcode
-        uses: actions/checkout@v2
+  # Render-deploy:
+  #   needs: Render-stop
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkoutcode
+  #       uses: actions/checkout@v2
 
-      - name: Install Render CLI
-        run: npm i render-cli -g 
+  #     - name: Install Render CLI
+  #       run: npm i render-cli -g 
 
-      - name: Install project dependencies
-        run: npm ci
+  #     - name: Install project dependencies
+  #       run: npm ci
 
-      - name: Deploy server to render
-        env: 
-          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
-          ENV_ID: environment_id
-        run: | 
-          render deploy \
-            --env $ENV_ID \
-            --build-command "src/$yarn" \
-            --start-command "src/npm run dev" \
-            --engine pug
+  #     - name: Deploy server to render
+  #       env: 
+  #         RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+  #         ENV_ID: environment_id
+  #       run: | 
+  #         render deploy \
+  #           --env $ENV_ID \
+  #           --build-command "src/$yarn" \
+  #           --start-command "src/npm run dev" \
+  #           --engine pug
 
-      - name: Verify deployment
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
-          if [ "$response" -eq 200 ]; then
-            echo "Server deployment successful"
-          else
-            echo "Server deployment failed"
-            exit 1
-          fi
+  #     - name: Verify deployment
+  #       run: |
+  #         response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
+  #         if [ "$response" -eq 200 ]; then
+  #           echo "Server deployment successful"
+  #         else
+  #           echo "Server deployment failed"
+  #           exit 1
+  #         fi
 
     
