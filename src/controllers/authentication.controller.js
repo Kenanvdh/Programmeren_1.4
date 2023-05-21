@@ -14,7 +14,7 @@ module.exports = {
         pool.getConnection((err, connection) => {
           if (err) {
             logger.error('Error getting connection from pool');
-            res.status(500).json({
+            return res.status(500).json({
               status: 500,
               message: err.code
             });
