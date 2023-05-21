@@ -47,14 +47,20 @@ jobs:
   Render-deploy:
     needs: integrationtests
     runs-on: ubuntu-latest
-    env:
-      name: Deploy on render
-    steps: 
+    steps:
+      - name: Checkoutcode
+        uses: actions/checkout@v2
+
       - name: Install Render CLI
         run: npm i -g @render/cli
 
-      - name: Deploy server to Render
-        run: render deploy --env ENV_ID --build-command "src/$yarn" --start-command "src/$npm run dev"
+      - name: Deploy server to render
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+        run: | 
+          render deploy \
+            --env ENV_ID
+            --build-command "src/$yarn"
+            --start-command "src/npm run dev"
 
+    
