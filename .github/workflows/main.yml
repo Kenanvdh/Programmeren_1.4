@@ -50,7 +50,7 @@ jobs:
       - name: Install Render CLI
         run: npm i render-cli -g
 
-      - name: Stop sserver
+      - name: Stop server
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
         run: render stop --env ENV_ID
@@ -74,7 +74,7 @@ jobs:
         run: | 
           render deploy \
             --env ENV_ID \
-            --build-command "src/$yarn" \
+            --build-command "src/$yarn" --engine pug \
             --start-command "src/npm run dev" \
             --engine pug
 
