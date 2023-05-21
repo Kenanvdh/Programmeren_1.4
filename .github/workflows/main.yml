@@ -62,5 +62,6 @@ jobs:
             --env ENV_ID
             --build-command "src/$yarn"
             --start-command "src/npm run dev"
+            -- engine ejs
 
     
