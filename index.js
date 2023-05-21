@@ -15,8 +15,8 @@ app.get('/api/info', (req, res) => {
     const method = req.method
     logger.info(`Method ${method} is called with parameters ${JSON.stringify(req.params)}`)
 
-    res.status(201).json({
-        status: 201,
+    res.status(200).json({
+        status: 200,
         message: 'Server info-endpoint',
         data: {
             studentName: 'Kenan',

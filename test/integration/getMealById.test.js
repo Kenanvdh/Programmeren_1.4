@@ -76,7 +76,7 @@ describe("UC-304 Opvragen van maaltijd bij ID", () => {
                 expect(data.isVega).to.equal(1);
                 expect(data.isVegan).to.equal(0);
                 expect(data.isToTakeHome).to.equal(0);
-                expect(data.dateTime).to.equal("2023-05-20T16:30:00.000Z");
+                expect(data.dateTime).to.equal("2023-05-20T18:30:00.000Z");
                 expect(data.maxAmountOfParticipants).to.equal(8);
                 expect(data.price).to.equal("15.99");
                 expect(data.imageUrl).to.equal("https://example.com/image1.jpg");
