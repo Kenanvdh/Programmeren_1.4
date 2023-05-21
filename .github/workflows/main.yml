@@ -53,7 +53,8 @@ jobs:
       - name: Stop server
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
-        run: render stop --env ENV_ID
+          ENV_ID: ENV_ID
+        run: render stop --env $ENV_ID
 
   Render-deploy:
     needs: Render-stop
