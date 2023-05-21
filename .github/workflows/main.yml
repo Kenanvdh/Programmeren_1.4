@@ -55,7 +55,9 @@ jobs:
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
           ENV_ID: environment_id
         run: |
-          render stop --env $ENV_ID 
+          render stop \
+           --env $ENV_ID \
+           --engine pug
 
       - name: Verify stop
         run: echo "Server has been stopped"
