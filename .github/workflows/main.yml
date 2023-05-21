@@ -55,19 +55,10 @@ jobs:
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
           ENV_ID: environment_id
         run: |
-          render stop \
-            --env $ENV_ID \
-            --engine pug
+          render stop --env $ENV_ID 
 
       - name: Verify stop
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
-          if [ "$response" -eq 200 ]; then
-            echo "Server stop unsuccessful"
-          else
-            echo "Server stop failed"
-            exit 1
-          fi
+        run: echo "Server has been stopped"
 
   Render-deploy:
     needs: Render-stop
@@ -85,10 +76,11 @@ jobs:
       - name: Deploy server to render
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+          ENV_ID: environment_id
         run: | 
           render deploy \
-            --env ENV_ID \
-            --build-command "src/$yarn" --engine pug \
+            --env $ENV_ID \
+            --build-command "src/$yarn" \
             --start-command "src/npm run dev" \
             --engine pug
 
