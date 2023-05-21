@@ -27,4 +27,4 @@ describe('Server-info', function () {
                 done()
             });
     });
-})
+}) 
