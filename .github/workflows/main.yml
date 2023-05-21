@@ -43,38 +43,57 @@ jobs:
         run: |
           npm test -- --DB_PASSWORD {{env.MYSQL_ROOT_PASSWORD}} --DB_USER root --DB_NAME ${{env.DB_DATABASE}}
 
-  Render-deploy:
+  Railway-deploy:
     needs: integrationtests
     runs-on: ubuntu-latest
+    environment:
+     name: Railway - Share a meal
     steps:
-      - name: Checkoutcode
-        uses: actions/checkout@v2
-
-      - name: Install Render CLI
-        run: npm i render-cli -g 
-
-      - name: Install project dependencies
-        run: npm ci
-
-      - name: Deploy server to render
-        env: 
-          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
-          ENV_ID: environment_id
-        run: | 
-          render deploy \
-            --env $ENV_ID \
-            --build-command "src/$yarn" \
-            --start-command "src/npm run dev" \
-            --engine pug
-
-      - name: Verify deployment
+      - name: Clone repository
+        uses: actions/checkout@master
+        
+      - name: 'Current token'
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
-          if [ "$response" -eq 200 ]; then
-            echo "Server deployment successful"
-          else
-            echo "Server deployment failed"
-            exit 1
-          fi
+             echo "secrets.RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}"
+        
+      - name: Install Railway
+        run: npm i -g @railway/cli
+        
+      - name: Deploy server to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-    
+  # Render-deploy:
+  #   needs: integrationtests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkoutcode
+  #       uses: actions/checkout@v2
+
+  #     - name: Install Render CLI
+  #       run: npm i render-cli -g 
+
+  #     - name: Install project dependencies
+  #       run: npm ci
+
+  #     - name: Deploy server to render
+  #       env: 
+  #         RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+  #         ENV_ID: environment_id
+  #       run: | 
+  #         render deploy \
+  #           --env $ENV_ID \
+  #           --build-command "src/$yarn" \
+  #           --start-command "src/npm run dev" \
+  #           --engine pug
+
+  #     - name: Verify deployment
+  #       run: |
+  #         response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
+  #         if [ "$response" -eq 200 ]; then
+  #           echo "Server deployment successful"
+  #         else
+  #           echo "Server deployment failed"
+  #           exit 1
+  #         fi
