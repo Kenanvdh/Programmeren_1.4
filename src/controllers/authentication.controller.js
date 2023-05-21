@@ -23,7 +23,7 @@ module.exports = {
             const sqlStatement = 'SELECT * FROM `user` WHERE `emailAdress`=?';
       
             connection.query(sqlStatement, [req.body.emailAdress], function (err, results, fields) {
-              pool.releaseConnection(connection);
+              connection.release(); // Release the connection back to the pool
       
               if (err) {
                 logger.error(err.message);
