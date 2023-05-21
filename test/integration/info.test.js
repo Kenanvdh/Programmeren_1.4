@@ -5,6 +5,9 @@ const chaihttp = require('chai-http')
 const server = require('../../index')
 
 chai.should()
+const assert = require("assert");
+const expect = chai.expect;
+
 chai.use(chaihttp)
 
 describe('Server-info', function () {
