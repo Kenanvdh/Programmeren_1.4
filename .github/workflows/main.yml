@@ -59,37 +59,47 @@ jobs:
             --env $ENV_ID \
             --engine pug
 
-  # Render-deploy:
-  #   needs: Render-stop
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkoutcode
-  #       uses: actions/checkout@v2
+      - name: Verify deployment
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
+          if [ "$response" -eq 200 ]; then
+            echo "Server stop unsuccessful"
+          else
+            echo "Server stop failed"
+            exit 1
+          fi
 
-  #     - name: Install Render CLI
-  #       run: npm i render-cli -g 
+  #Render-deploy:
+    # needs: Render-stop
+    # runs-on: ubuntu-latest
+    # steps:
+    #   - name: Checkoutcode
+    #     uses: actions/checkout@v2
 
-  #     - name: Install project dependencies
-  #       run: npm ci
+    #   - name: Install Render CLI
+    #     run: npm i render-cli -g 
 
-  #     - name: Deploy server to render
-  #       env: 
-  #         RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
-  #       run: | 
-  #         render deploy \
-  #           --env ENV_ID \
-  #           --build-command "src/$yarn" --engine pug \
-  #           --start-command "src/npm run dev" \
-  #           --engine pug
+    #   - name: Install project dependencies
+    #     run: npm ci
 
-  #     - name: Verify deployment
-  #       run: |
-  #         response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
-  #         if [ "$response" -eq 200 ]; then
-  #           echo "Server deployment successful"
-  #         else
-  #           echo "Server deployment failed"
-  #           exit 1
-  #         fi
+    #   - name: Deploy server to render
+    #     env: 
+    #       RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+    #     run: | 
+    #       render deploy \
+    #         --env ENV_ID \
+    #         --build-command "src/$yarn" --engine pug \
+    #         --start-command "src/npm run dev" \
+    #         --engine pug
+
+    #   - name: Verify deployment
+    #     run: |
+    #       response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
+    #       if [ "$response" -eq 200 ]; then
+    #         echo "Server deployment successful"
+    #       else
+    #         echo "Server deployment failed"
+    #         exit 1
+    #       fi
 
     
