@@ -56,6 +56,7 @@ jobs:
 
       - name: Deploy server to render
         env: 
+          NODE_ENV: development
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
         run: | 
           render deploy \
