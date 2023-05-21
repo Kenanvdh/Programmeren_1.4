@@ -56,7 +56,7 @@ jobs:
         run: render stop --env ENV_ID
 
   Render-deploy:
-    needs: integrationtests
+    needs: Render-stop
     runs-on: ubuntu-latest
     steps:
       - name: Checkoutcode
