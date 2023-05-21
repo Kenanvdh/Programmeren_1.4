@@ -13,7 +13,7 @@ router.get('', userController.getAllUsers);
 
 // UC-203 Haal het userprofile op van de user die ingelogd is
 router.get(
-    '/profile',
+    '/profile', 
     authController.validateToken,
     userController.getUserProfile
 );
