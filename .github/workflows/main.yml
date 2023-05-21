@@ -54,6 +54,9 @@ jobs:
       - name: Install Render CLI
         run: npm i render-cli -g 
 
+      - name: Install project dependencies
+        run: npm ci
+
       - name: Deploy server to render
         env: 
           RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
