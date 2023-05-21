@@ -104,13 +104,27 @@ const userController = {
                                     }
                                     return true;
                                 }
+                                function phoneNumberValidation(phoneNumber) {
+                                    const regEx = /^06[-\s]?[1-9]\d{7}$/;
+                                    const validPhoneNumber = regEx.test(phoneNumber);
+                                    if (!validPhoneNumber) {
+                                        res.status(400).json({
+                                            status: 400,
+                                            message: `${phoneNumber} is invalid!`,
+                                            data: {},
+                                        });
+                                        return false;
+                                    }
+                                    return true;
+                                }
                                 if (
                                     !validateField('firstName', 'string', user.firstName) ||
                                     !validateField('lastName', 'string', user.lastName) ||
                                     !validateField('emailAdress', 'string', user.emailAdress) ||
                                     !validateField('password', 'string', user.password) ||
                                     !emailValidation(user.emailAdress) ||
-                                    !passwordValidation(user.password)
+                                    !passwordValidation(user.password) ||
+                                    !phoneNumberValidation(user.phoneNumber)
                                 ) {
                                     return;
                                 }
