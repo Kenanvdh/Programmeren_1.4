@@ -43,6 +43,17 @@ jobs:
         run: |
           npm test -- --DB_PASSWORD {{env.MYSQL_ROOT_PASSWORD}} --DB_USER root --DB_NAME ${{env.DB_DATABASE}}
 
+  Render-stop:
+    needs: integrationtests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Render CLI
+        run: npm i render-cli -g
+
+      - name: Stop sserver
+        env: 
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+        run: render stop --env ENV_ID
 
   Render-deploy:
     needs: integrationtests
