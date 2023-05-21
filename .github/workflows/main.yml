@@ -67,4 +67,14 @@ jobs:
             --start-command "src/npm run dev" \
             --engine pug
 
+      - name: Verify deployment
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com)
+          if [ "$response" -eq 200 ]; then
+            echo "Server deployment successful"
+          else
+            echo "Server deployment failed"
+            exit 1
+          fi
+
     
