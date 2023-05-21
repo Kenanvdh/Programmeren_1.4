@@ -69,7 +69,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com)
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://shareameal-90qv.onrender.com/api/user)
           if [ "$response" -eq 200 ]; then
             echo "Server deployment successful"
           else
