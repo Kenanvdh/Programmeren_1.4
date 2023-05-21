@@ -3,19 +3,19 @@ const router = express.Router();
 const mealController = require('../controllers/meal.controller');
 const authController = require('../controllers/authentication.controller');
 
-// UC-301 Create nieuwe meal
+// UC-301 - Toevoegen van maaltijd
 router.post('', authController.validateToken, mealController.createMeal);
 
-//UC-302 Updaten meal 
+//UC-302 - Wijzigen van maaltijdsgegevens
 router.put('/:mealId', authController.validateToken, mealController.updateMeal);
 
-// UC-303 Opvragen van overzicht van meals
+// UC-303 - Opvragen van alle maaltijden
 router.get('', mealController.getAllMeals);
 
-//UC-304 Get meal by ID
+//UC-304 - Opvragen van maaltijd bij ID
 router.get('/:mealId', mealController.getMeal);
 
-//UC 305 Verwijderen meal
+//UC 305 - Verwijderen van maaltijd
 router.delete('/:mealId', authController.validateToken, mealController.deleteMeal);
 
 module.exports = router;

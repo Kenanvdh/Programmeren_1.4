@@ -47,6 +47,19 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
                 expect(message).to.equal('User getAll endpoint')
                 expect(data).to.be.an('array')
                 expect(data.length).to.be.at.least(2)
+                data.forEach((user) => {
+                    expect(user).to.be.an("object");
+                    expect(user).to.have.property("id");
+                    expect(user).to.have.property("firstName");
+                    expect(user).to.have.property("lastName");
+                    expect(user).to.have.property("emailAdress");
+                    expect(user).to.have.property("password");
+                    expect(user).to.have.property("phoneNumber");
+                    expect(user).to.have.property("roles");
+                    expect(user).to.have.property("street");
+                    expect(user).to.have.property("city");
+                    expect(user).to.have.property("isActive");
+                  });
                 done()
             })
     })
@@ -78,7 +91,19 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
                 expect(status).to.equal(200)
                 expect(message).to.equal('User getAll endpoint')
                 expect(data).to.be.an('array')
-                expect(data).to.be.empty
+                data.forEach((user) => {
+                    expect(user).to.be.an("object");
+                    expect(user).to.have.property("id");
+                    expect(user).to.have.property("firstName");
+                    expect(user).to.have.property("lastName");
+                    expect(user).to.have.property("emailAdress");
+                    expect(user).to.have.property("password");
+                    expect(user).to.have.property("phoneNumber");
+                    expect(user).to.have.property("roles");
+                    expect(user).to.have.property("street");
+                    expect(user).to.have.property("city");
+                    expect(user).to.have.property("isActive");
+                  });
                 done()
             })
     })
@@ -89,16 +114,29 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
             .request(server)
             .get(`/api/user?${filter}`)
             .end((err, res) => {
-                assert(err === null)
-                let { status, message, data } = res.body
-                expect(status).to.equal(200)
-                expect(message).to.equal('User getAll endpoint')
-                expect(data).to.be.an('array')
-                expect(data.length).to.be.at.least(2)
-                done()
-            })
-    })
-
+                assert(err === null);
+                let { status, message, data } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.equal('User getAll endpoint');
+                expect(data).to.be.an('array');
+                expect(data.length).to.be.at.least(2);
+                data.forEach((user) => {
+                    expect(user).to.be.an("object");
+                    expect(user).to.have.property("id");
+                    expect(user).to.have.property("firstName");
+                    expect(user).to.have.property("lastName");
+                    expect(user).to.have.property("emailAdress");
+                    expect(user).to.have.property("password");
+                    expect(user).to.have.property("phoneNumber");
+                    expect(user).to.have.property("roles");
+                    expect(user).to.have.property("street");
+                    expect(user).to.have.property("city");
+                    expect(user).to.have.property("isActive");
+                });
+                done();
+            });
+    });
+    
     it('TC-202-5 - Toon gebruikers met zoektermen op bestaande velden (maximaal op 2 velden filteren)', (done) => {
         chai
             .request(server)
@@ -111,6 +149,19 @@ describe("UC 202 - Opvragen van overzicht van users", () => {
                 expect(message).to.equal('User getAll endpoint')
                 expect(data).to.be.an('array')
                 expect(data.length).to.be.at.least(2)
+                data.forEach((user) => {
+                    expect(user).to.be.an("object");
+                    expect(user).to.have.property("id");
+                    expect(user).to.have.property("firstName");
+                    expect(user).to.have.property("lastName");
+                    expect(user).to.have.property("emailAdress");
+                    expect(user).to.have.property("password");
+                    expect(user).to.have.property("phoneNumber");
+                    expect(user).to.have.property("roles");
+                    expect(user).to.have.property("street");
+                    expect(user).to.have.property("city");
+                    expect(user).to.have.property("isActive");
+                  });
                 done()
             })
     })

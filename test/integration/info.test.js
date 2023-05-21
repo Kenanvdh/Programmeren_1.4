@@ -8,7 +8,7 @@ chai.should()
 chai.use(chaihttp)
 
 describe('Server-info', function () {
-    it('TC-102- Server info', (done) => {
+    it('TC Server info', (done) => {
         chai
             .request(server)
             .get('/api/info')

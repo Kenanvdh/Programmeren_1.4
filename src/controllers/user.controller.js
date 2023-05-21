@@ -4,129 +4,7 @@ const pool = require('../util/mysql-db')
 const jwt = require('jsonwebtoken');
 
 const userController = {
-    getAllUsers: (req, res, next) => {
-        logger.info('Get all users');
-
-        let sqlStatement = "SELECT * FROM `user`";
-        let filters = [];
-
-        if (req.query.isActive) {
-            // Check if the user fills in true or false, make it 1 or 0
-            if (req.query.isActive === "true") {
-                req.query.isActive = 1;
-            } else if (req.query.isActive === "false") {
-                req.query.isActive = 0;
-            }
-            filters.push(`isActive = ${req.query.isActive}`);
-        }
-
-        // Check if roles filter is provided
-        if (req.query.roles) {
-            const roles = req.query.roles.split(",");
-            const rolesFilter = roles
-                .map((role) => `roles LIKE '%${role}%'`)
-                .join(" OR ");
-            filters.push(`(${rolesFilter})`);
-        }
-
-        // Append filters to the SQL statement if any
-        if (filters.length > 0) {
-            sqlStatement += ` WHERE ${filters.join(" AND ")}`;
-        }
-
-        pool.getConnection(function (err, conn) {
-            if (err) {
-                logger.error(err);
-                next({
-                    code: 500,
-                    message: err.code,
-                });
-                return;
-            }
-            conn.query(
-                sqlStatement,
-                function (err, results, fields) {
-                    if (err) {
-                        logger.error(err.message);
-                        next({
-                            code: 409,
-                            message: err.message,
-                        });
-                        return;
-                    }
-                    logger.info("Found", results.length, "results");
-
-                    // Check if no filters other than isActive or roles are provided
-                    if (
-                        Object.keys(req.query).filter(
-                            (key) => key !== "isActive" && key !== "roles"
-                        ).length === 0
-                    ) {
-                        res.status(200).json({
-                            status: 200,
-                            message: "User getAll endpoint",
-                            data: results,
-                        });
-                    } else if (
-                        Object.keys(req.query).some(
-                            (key) => key !== "isActive" && key !== "roles"
-                        )
-                    ) {
-                        res.status(200).json({
-                            status: 200,
-                            message: "Invalid filter(s) used",
-                            data: {}
-                        });
-                    } else {
-                        res.status(200).json({
-                            status: 200,
-                            message: "User getAll endpoint",
-                            data: [],
-                        });
-                    }
-                    conn.release();
-                }
-            );
-        });
-    },
-
-    getUserProfile: (req, res, next) => {
-        logger.info('Get user profile for user', req.userId);
-
-        let sqlStatement = 'SELECT * FROM `user` WHERE id=?';
-
-        pool.getConnection(function (err, conn) {
-            // Do something with the connection
-            if (err) {
-                logger.error(err.code, err.syscall, err.address, err.port);
-                next({
-                    code: 500,
-                    message: err.code
-                });
-            }
-            if (conn) {
-                conn.query(sqlStatement, [req.userId], (err, results, fields) => {
-                    if (err) {
-                        logger.error(err.message);
-                        next({
-                            code: 409,
-                            message: err.message
-                        });
-                    }
-                    if (results) {
-                        logger.trace('Found', results.length, 'results');
-                        res.status(200).json({
-                            code: 200,
-                            message: 'Get User profile',
-                            data: results[0]
-                        });
-                    }
-                });
-                pool.releaseConnection(conn);
-            }
-        });
-    },
-
+    //UC 201 - Registreren als nieuwe use
     createUser: (req, res, next) => {
         const email = req.body.emailAdress;
 
@@ -275,6 +153,132 @@ const userController = {
         })
     },
 
+    // UC-202 - Opvragen van overzicht van users
+    getAllUsers: (req, res, next) => {
+        logger.info('Get all users');
+
+        let sqlStatement = "SELECT * FROM `user`";
+        let filters = [];
+
+        if (req.query.isActive) {
+            // Check if the user fills in true or false, make it 1 or 0
+            if (req.query.isActive === "true") {
+                req.query.isActive = 1;
+            } else if (req.query.isActive === "false") {
+                req.query.isActive = 0;
+            }
+            filters.push(`isActive = ${req.query.isActive}`);
+        }
+
+        // Check if roles filter is provided
+        if (req.query.roles) {
+            const roles = req.query.roles.split(",");
+            const rolesFilter = roles
+                .map((role) => `roles LIKE '%${role}%'`)
+                .join(" OR ");
+            filters.push(`(${rolesFilter})`);
+        }
+
+        // Append filters to the SQL statement if any
+        if (filters.length > 0) {
+            sqlStatement += ` WHERE ${filters.join(" AND ")}`;
+        }
+
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                logger.error(err);
+                next({
+                    code: 500,
+                    message: err.code,
+                });
+                return;
+            }
+            conn.query(
+                sqlStatement,
+                function (err, results, fields) {
+                    if (err) {
+                        logger.error(err.message);
+                        next({
+                            code: 409,
+                            message: err.message,
+                        });
+                        return;
+                    }
+                    logger.info("Found", results.length, "results");
+
+                    // Check if no filters other than isActive or roles are provided
+                    if (
+                        Object.keys(req.query).filter(
+                            (key) => key !== "isActive" && key !== "roles"
+                        ).length === 0
+                    ) {
+                        res.status(200).json({
+                            status: 200,
+                            message: "User getAll endpoint",
+                            data: results,
+                        });
+                    } else if (
+                        Object.keys(req.query).some(
+                            (key) => key !== "isActive" && key !== "roles"
+                        )
+                    ) {
+                        res.status(200).json({
+                            status: 200,
+                            message: "Invalid filter(s) used",
+                            data: {}
+                        });
+                    } else {
+                        res.status(200).json({
+                            status: 200,
+                            message: "User getAll endpoint",
+                            data: [],
+                        });
+                    }
+                    conn.release();
+                }
+            );
+        });
+    },
+
+    //UC-203 - Opvragen van gebruikersprofiel
+    getUserProfile: (req, res, next) => {
+        logger.info('Get user profile for user', req.userId);
+
+        let sqlStatement = 'SELECT * FROM `user` WHERE id=?';
+
+        pool.getConnection(function (err, conn) {
+            // Do something with the connection
+            if (err) {
+                logger.error(err.code, err.syscall, err.address, err.port);
+                next({
+                    code: 500,
+                    message: err.code
+                });
+            }
+            if (conn) {
+                conn.query(sqlStatement, [req.userId], (err, results, fields) => {
+                    if (err) {
+                        logger.error(err.message);
+                        next({
+                            code: 409,
+                            message: err.message
+                        });
+                    }
+                    if (results) {
+                        logger.trace('Found', results.length, 'results');
+                        res.status(200).json({
+                            status: 200,
+                            message: 'Get User profile',
+                            data: results[0]
+                        });
+                    }
+                });
+                pool.releaseConnection(conn);
+            }
+        });
+    },
+
+    //UC-204 - Opvragen van usergegevens bij ID
     getUser: (req, res, next) => {
         const loggedInUserId = req.userId; // Logged-in user ID
         const userId = parseInt(req.params.userId);
@@ -331,6 +335,7 @@ const userController = {
         });
     },
 
+    //UC-205 - Updaten van usergegevens
     updateUser: (req, res, next) => {
         const loggedInUserId = req.userId; // Logged-in user ID
         const userId = parseInt(req.params.userId);
@@ -495,6 +500,7 @@ const userController = {
         });
     },
 
+    //UC-206 - Verwijderen van user
     deleteUser: (req, res, next) => {
         const loggedInUserId = req.userId; // Logged-in user ID
         const userId = parseInt(req.params.userId);
@@ -555,7 +561,7 @@ const userController = {
                                 return;
                             }
 
-                            logger.info('results: ', results); // results contains rows affected by server
+                            logger.info('Results: ', results); // results contains rows affected by server
                             res.status(200).json({
                                 status: 200,
                                 message: 'User deleted met ID ' + userId,

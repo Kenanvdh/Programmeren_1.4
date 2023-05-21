@@ -42,7 +42,7 @@ describe("UC-205 Updaten van usergegevens", () => {
             firstName: 'John',
             lastName: 'Doe',
             isActive: true,
-            emailAdress: '', // Empty email field
+            emailAdress: '',
             password: 'password123',
             phoneNumber: '1234567890',
             roles: 'user',
@@ -56,11 +56,12 @@ describe("UC-205 Updaten van usergegevens", () => {
             .set("Authorization", "Bearer " + token)
             .send(updatedUser)
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(400);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('is required');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.be.equal(400);
+                expect(message).to.contain("is required");
+                expect(data).to.be.an("object");
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -87,11 +88,12 @@ describe("UC-205 Updaten van usergegevens", () => {
             .set("Authorization", "Bearer " + token)
             .send(updatedUser)
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(403);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('You cannot update someone elses info.');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(403);
+                expect(message).to.contain('You cannot update someone elses info.');
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -118,11 +120,12 @@ describe("UC-205 Updaten van usergegevens", () => {
             .set("Authorization", "Bearer " + token)
             .send({ updatedUser })
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(400);
-                expect(res.body.data).to.be.an('object');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(400);
+                expect(message).to.contain('is required');
+                expect(data).to.be.an('object');
                 expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('is required');
                 done();
             });
     });
@@ -155,7 +158,7 @@ describe("UC-205 Updaten van usergegevens", () => {
                 done();
             });
     });
-    
+
     it('TC-205-5- Niet ingelogd', (done) => {
         const token = "";
         const userId = 123;
@@ -178,10 +181,11 @@ describe("UC-205 Updaten van usergegevens", () => {
             .send(updatedUser)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(401);
-                expect(res.body.message).to.be.equal("Invalid token!");
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                let { data, message, status } = res.body;
+                expect(status).to.equal(401);
+                expect(message).to.be.equal("Invalid token!");
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -189,7 +193,7 @@ describe("UC-205 Updaten van usergegevens", () => {
     it('TC-205-6- Gebruiker succesvol gewijzigd', (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
         const userId = 6
-       
+
         const updatedUser = {
             firstName: 'John',
             lastName: 'Doe',
@@ -207,11 +211,16 @@ describe("UC-205 Updaten van usergegevens", () => {
             .put(`/api/user/${userId}`)
             .set("Authorization", "Bearer " + token)
             .send(updatedUser)
-            .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(200);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.message).to.contain('User updated with id');
+            .end((err, res) => { assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.contain("User updated with id");
+                expect(data).to.be.an('object');
+                
+                expect(data).to.have.property('id')
+                expect(data.firstName).to.equal('John')
+                expect(data.lastName).to.equal('Doe')
+                expect(data.password).to.equal('Password123')
                 done();
             });
     });

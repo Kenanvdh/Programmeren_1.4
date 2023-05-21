@@ -46,31 +46,46 @@ describe("UC-304 Opvragen van maaltijd bij ID", () => {
         const mealId = -1
         chai
             .request(server)
-            .delete(`/api/meal/${mealId}`)
+            .get(`/api/meal/${mealId}`)
             .set("Authorization", `Bearer ${token}`)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(404);
-                expect(res.body.message).to.be.equal("Meal niet gevonden");
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                let { data, message, status } = res.body;
+                expect(status).to.equal(404);
+                expect(message).to.be.equal("Meal not found");
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
 
-    it("TC-304-2 Maaltijd succesvol verwijderd", (done) => {
+    it("TC-304-2 Details van maaltijd geretourneerd", (done) => {
         const token = jwt.sign({ userId: 1 }, jwtSecretKey);
         const mealId = 1
 
         chai
             .request(server)
-            .delete(`/api/meal/${mealId}`)
+            .get(`/api/meal/${mealId}`)
             .set("Authorization", `Bearer ${token}`)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(200);
-                expect(res.body.message).to.contain("Meal deleted with id ");
-                expect(res.body.data).to.be.an('object');
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.equal("Meal retrieved successfully");
+                expect(data.isActive).to.equal(1);
+                expect(data.isVega).to.equal(1);
+                expect(data.isVegan).to.equal(0);
+                expect(data.isToTakeHome).to.equal(0);
+                expect(data.dateTime).to.equal("2023-05-20T16:30:00.000Z");
+                expect(data.maxAmountOfParticipants).to.equal(8);
+                expect(data.price).to.equal("15.99");
+                expect(data.imageUrl).to.equal("https://example.com/image1.jpg");
+                expect(data.cookId).to.equal(1);
+                expect(data.createDate).to.equal("2023-05-17T22:00:00.000Z");
+                expect(data.name).to.equal("Meal 1")
+                expect(data.updateDate).to.equal("2023-05-17T22:00:00.000Z");
+                expect(data.description).to.equal("This is the description for Meal 1");
+                expect(data.allergenes).to.equal("lactose");
                 done();
             });
     });

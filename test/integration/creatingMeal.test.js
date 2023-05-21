@@ -65,11 +65,12 @@ describe("UC-301 Toevoegen van maaltijd", () => {
             .send(meal)
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
-                res.should.have.status(400);
-                res.body.should.have.property(
-                    "message",
-                    "Foute invoer van een of meerdere velden"
-                );
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(400);
+                expect(message).to.equal("Foute invoer van een of meerdere velden");
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -134,10 +135,24 @@ describe("UC-301 Toevoegen van maaltijd", () => {
             .send(meal)
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
-                res.should.have.status(201);
-                res.body.should.have.property("message", "Meal created");
-                res.body.should.have.property("data");
-                res.body.data.should.have.property("meal");
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(201);
+                expect(message).to.equal("Meal created");
+                expect(data.meal.isActive).to.equal(1);
+                expect(data.meal.isVega).to.equal(0);
+                expect(data.meal.isVegan).to.equal(0);
+                expect(data.meal.isToTakeHome).to.equal(0);
+                expect(data.meal.dateTime).to.equal("2023-05-20 18:30:00");
+                expect(data.meal.maxAmountOfParticipants).to.equal(8);
+                expect(data.meal.price).to.equal("15.99");
+                expect(data.meal.imageUrl).to.equal("https://example.com/image1.jpg");
+                expect(data.meal.cookId).to.equal(1);
+                expect(data.meal.createDate).to.equal("2023-05-18");
+                expect(data.meal.name).to.equal("Meal 1")
+                expect(data.meal.updateDate).to.equal("2023-05-18");
+                expect(data.meal.description).to.equal("This is the description for Meal 1");
+                expect(data.meal.allergenes).to.equal("lactose");
                 done();
             });
     });

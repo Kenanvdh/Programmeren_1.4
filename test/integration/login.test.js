@@ -24,7 +24,7 @@ const INSERT_USER =
     "VALUES (6, 'John', 'deere', 1, 'john.deere@example.com', 'Password12', 0634567890, 'admin', 'dorpsstraat', 'Breda'), (7, 'john', 'doe', 1, 'john.doe@example.com', 'Password12', 0612345678, 'guest', 'Straat 12', 'Nur Sultan')";
 
 
-describe("UC 101 - inloggen", () => {
+describe("UC 101 - Inloggen", () => {
     before((done) => {
         // Clear the database and insert a user for testing
         pool.query(CLEAR_DB, (err, result) => {
@@ -43,15 +43,11 @@ describe("UC 101 - inloggen", () => {
             .send({ emailAdress: "johan.doe@example.com" })
             .end((err, res) => {
                 assert(err === null);
-                const { body } = res;
-                res.should.have.status(422);
-                body.should.be.an("object");
-                body.should.have
-                    .property("error")
-                    .to.be.equal(
-                        "AssertionError [ERR_ASSERTION]: password must be a string."
-                    );
-                body.should.have.property("datetime");
+                let { data, message, status } = res.body;
+                expect(status).to.equal(400);
+                expect(message).to.equal("Not authorized");
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -63,33 +59,27 @@ describe("UC 101 - inloggen", () => {
             .send({ emailAdress: "john.doe@example.com", password: "password12" })
             .end((err, res) => {
                 assert(err === null);
-                const { body } = res;
-                res.should.have.status(400);
-                body.should.be.an("object");
-                body.should.have.property("code").to.be.equal(400);
-                body.should.have.property("message").to.be.equal("Not authorized");
-                body.should.have.property("data");
-                const { data } = body;
-                data.should.be.an("object");
+                let { data, message, status } = res.body;
+                expect(status).to.equal(400);
+                expect(message).to.equal("Not authorized");
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
 
-    it("TC-101-3 - gebruiker bestaat niet", (done) => {
+    it("TC-101-3 - Gebruiker bestaat niet", (done) => {
         chai
             .request(server)
             .post("/api/login")
             .send({ emailAdress: "j.doe@example.com", password: "Welkom123" })
             .end((err, res) => {
                 assert(err === null);
-                const { body } = res;
-                res.should.have.status(404);
-                body.should.be.an("object");
-                body.should.have.property("code").to.be.equal(404);
-                body.should.have.property("message").to.be.equal("User not found");
-                body.should.have.property("data");
-                const { data } = body;
-                data.should.be.an("object");
+                let { data, message, status } = res.body;
+                expect(status).to.equal(404);
+                expect(message).to.equal("User not found");
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -104,18 +94,15 @@ describe("UC 101 - inloggen", () => {
             })
             .end((err, res) => {
                 assert(err === null);
-                res.should.have.status(200);
-                res.body.should.be.an("object");
-                res.body.should.have.property("code").to.be.equal(200);
-                res.body.should.have.property("message").to.be.equal("Login endpoint");
-                res.body.should.have.property("data");
-                const { data } = res.body;
-                data.should.be.an("object");
-                data.should.have.property("token");
-                data.should.have.property("id");
-                data.should.have.property("firstName");
-                data.should.have.property("lastName");
-                data.should.have.property("emailAdress");
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.equal("Login endpoint");
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.have.property("id").to.equal(7);
+                expect(data).to.have.property("firstName").to.equal("john");
+                expect(data).to.have.property("lastName").to.equal("doe");
+                expect(data).to.have.property("emailAdress").to.equal("john.doe@example.com");
+                expect(data).to.have.property("token");
                 done();
             });
     });

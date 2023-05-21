@@ -23,7 +23,7 @@ const INSERT_USER =
     "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city)" +
     "VALUES (6, 'John', 'deere', 1, 'john.deere@example.com', 'Password12', 0634567890, 'admin', 'dorpsstraat', 'Breda'), (7, 'john', 'doe', 1, 'john.doe@example.com', 'Password12', 0612345678, 'guest', 'Straat 12', 'Nur Sultan')";
 
-describe("UC 201 - create user", () => {
+describe("UC 201 - Registreren als nieuwe user", () => {
     before((done) => {
         // Clear the database and insert a user for testing
         pool.query(CLEAR_DB, (err, result) => {
@@ -39,13 +39,14 @@ describe("UC 201 - create user", () => {
         chai
             .request(server)
             .post('/api/user')
-            .send({ lastName: 'van Pol', emailAdress: "jellevanpol@gmail.com", password: 'Password1' })
+            .send({ lastName: 'van der Heijden', emailAdress: "kenanvdh@gmail.com", password: 'Welkom01' })
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(400);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('is invalid!');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.be.equal(400);
+                expect(message).to.contain("is invalid!");
+                expect(data).to.be.an("object");
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -57,11 +58,12 @@ describe("UC 201 - create user", () => {
             .post('/api/user')
             .send({ firstName: 'Kenan', lastName: 'van der Heijden', emailAdress: invalidEmail, password: 'K' })
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(400);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('is invalid!');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.be.equal(400);
+                expect(message).to.contain("is invalid!");
+                expect(data).to.be.an("object");
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -73,11 +75,12 @@ describe("UC 201 - create user", () => {
             .post('/api/user')
             .send({ firstName: 'Kenan', lastName: 'van der Heijden', emailAdress: 'kenanvdh@ziggo.nl', password: invalidPassword, phoneNumber: '06 98765432' })
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(400);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('is invalid!');
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.be.equal(400);
+                expect(message).to.contain("is invalid!");
+                expect(data).to.be.an("object");
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -96,9 +99,12 @@ describe("UC 201 - create user", () => {
             .post('/api/user')
             .send(newUser)
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(403);
-                expect(res.body.message).to.contain('is already registered!');
+                assert(err === null);
+                let {data, message, status} = res.body;
+                expect(status).to.be.equal(403);
+                expect(message).to.contain("is already registered!");
+                expect(data).to.be.an("object");
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -132,6 +138,7 @@ describe("UC 201 - create user", () => {
                 expect(data).to.have.property('id')
                 expect(data.firstName).to.equal('Kenan')
                 expect(data.lastName).to.equal('van der Heijden')
+                expect(data.password).to.equal('Welkom01')
 
                 done();
             });

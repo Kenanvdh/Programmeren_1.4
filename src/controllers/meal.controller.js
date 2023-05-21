@@ -3,7 +3,7 @@ const assert = require('assert');
 const pool = require('../util/mysql-db');
 
 const mealController = {
-  // UC-301 Create nieuwe meal
+  //UC-301 - Create nieuwe meal
   createMeal: (req, res, next) => {
     const userId = req.userId;
     var currentDate = new Date();
@@ -112,7 +112,7 @@ const mealController = {
                     const user = userResults[0];
 
                     res.status(201).json({
-                      code: 201,
+                      status: 201,
                       message: "Meal created",
                       data: {
                         meal: { mealId, ...meal },
@@ -129,7 +129,7 @@ const mealController = {
     });
   },
 
-  // UC-302 Updaten meal 
+  //UC-302 - Updaten meal 
   updateMeal: (req, res, next) => {
     const meal = req.body;
     const mealId = req.params.mealId;
@@ -247,14 +247,14 @@ const mealController = {
               logger.trace(results);
               logger.info("Found", results.length, "results");
               res.status(200).json({
-                statusCode: 200,
+                status: 200,
                 message: `Meal updated with id ${mealId} `,
                 data: { mealId, ...meal }
               });
             } else {
               logger.info(`Not authorized to update meal with id ${mealId}`);
               res.status(401).json({
-                statusCode: 401,
+                status: 401,
                 message: `Not authorized to update meal with id ${mealId}`,
                 data: results,
               });
@@ -265,7 +265,7 @@ const mealController = {
     });
   },
 
-  // UC-303 Opvragen van overzicht van meals
+  //UC-303 - Opvragen van overzicht van meals
   getAllMeals: (req, res, next) => {
     logger.info('Get all meals');
 
@@ -293,7 +293,7 @@ const mealController = {
           if (results) {
             logger.info('Found', results.length, 'results');
             res.status(200).json({
-              code: 200,
+              status: 200,
               message: 'Meal getAll endpoint',
               data: results
             });
@@ -304,7 +304,7 @@ const mealController = {
     });
   },
 
-  //UC 304 Opvragen meal
+  //UC 304 - Opvragen meal
   getMeal: (req, res, next) => {
     logger.info('Get meal');
 
@@ -321,9 +321,9 @@ const mealController = {
 
       if (conn) {
         conn.query(
-          'SELECT * FROM `meal` WHERE `id` = ?',
+          'SELECT * FROM `meal` WHERE `id` = ? LIMIT 1',
           [mealId],
-          (err, results) => {
+          (err, result) => {
             if (err) {
               conn.release();
               return res.status(500).json({
@@ -333,7 +333,7 @@ const mealController = {
               });
             }
 
-            if (results.length === 0) {
+            if (result.length === 0) {
               conn.release();
               return res.status(404).json({
                 status: 404,
@@ -345,7 +345,7 @@ const mealController = {
             res.status(200).json({
               status: 200,
               message: 'Meal retrieved successfully',
-              data: results
+              data: result[0]
             });
             conn.release();
           }
@@ -354,8 +354,7 @@ const mealController = {
     });
   },
 
-
-  //UC 305 Verwijderen meal
+  //UC 305 - Verwijderen meal
   deleteMeal: (req, res, next) => {
     const mealId = req.params.mealId
     const userId = req.userId
@@ -434,15 +433,15 @@ const mealController = {
               if (results && results.affectedRows === 1) {
                 logger.info('Results: ', results);
                 res.status(200).json({
-                  code: 200,
+                  status: 200,
                   message: 'Meal deleted with id ' + mealId,
                   data: results
                 })
               } else {
                 res.status(401).json({
-                  statusCode: 401,
+                  status: 401,
                   message: "Not authorized to delete meal with id: " + mealId,
-                  data: results,
+                  data: {},
                 });
               }
             });

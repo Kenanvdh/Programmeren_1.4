@@ -42,16 +42,16 @@ describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null)
-                let { code, message, data } = res.body
-                expect(code).to.equal(401)
+                let { status, message, data } = res.body
+                expect(status).to.equal(401)
                 expect(message).to.equal('Invalid token!')
-                expect(data).to.be.an('object').that.is.empty
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done()
             })
     })
 
-    //need to check on data
-    it("TC-203-2 - Should return user profile", (done) => {
+    it("TC-203-2 - Gebruiker is ingelogd met geldig token", (done) => {
         const token = jwt.sign({ userId: 6 }, jwtSecretKey);
         chai
             .request(server)
@@ -59,15 +59,15 @@ describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null);
-                let {data, message, code} = res.body;
-                res.body.should.be.an("object");
-                res.body.should.have.property("code").to.be.equal(200);
-                res.body.should.have.property("message");
-                res.body.should.have.property("data");
+                let {data, message, status} = res.body;
+                expect(status).to.be.equal(200);
+                expect(message).to.equal("Get User profile");
 
-                expect(data).to.have.property('id')
+                expect(data).to.have.property('id').to.equal(6)
                 expect(data.firstName).to.equal('John')
                 expect(data.lastName).to.equal('deere')
+                expect(data.emailAdress).to.equal('john.deere@example.com')
+                expect(data.password).to.equal('Password12')
                 done();
             });
     });

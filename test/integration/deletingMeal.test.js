@@ -50,27 +50,29 @@ describe("UC-305 Verwijderen van maaltijd", () => {
             .set("Authorization", `Bearer ${token}`)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(401);
-                expect(res.body.message).to.be.equal("Invalid token!");
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                let { data, message, status } = res.body;
+                expect(status).to.equal(401);
+                expect(message).to.be.equal("Invalid token!");
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
 
     it("TC-305-2 Niet de eigenaar van de data", (done) => {
         const token = jwt.sign({ userId: 1 }, jwtSecretKey);
-        const id = 2; 
+        const id = 2;
         chai
             .request(server)
             .delete(`/api/user/${id}`)
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null)
-                expect(res).to.have.status(403);
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('You cannot delete someone elses info.');
+                let { data, message, status } = res.body;
+                expect(status).to.equal(403);
+                expect(message).to.contain('You cannot delete someone elses info.');
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -84,10 +86,11 @@ describe("UC-305 Verwijderen van maaltijd", () => {
             .set("Authorization", `Bearer ${token}`)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(404);
-                expect(res.body.message).to.be.equal("Meal niet gevonden");
-                expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                let { data, message, status } = res.body;
+                expect(status).to.equal(404);
+                expect(message).to.equal("Meal niet gevonden");
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -102,8 +105,9 @@ describe("UC-305 Verwijderen van maaltijd", () => {
             .set("Authorization", `Bearer ${token}`)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(200);
-                expect(res.body.message).to.contain("Meal deleted with id ");
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.contain('Meal deleted with id ')
                 expect(res.body.data).to.be.an('object');
                 done();
             });

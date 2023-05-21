@@ -23,7 +23,7 @@ const INSERT_USER =
     "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city)" +
     "VALUES (6, 'John', 'deere', 1, 'john.deere@example.com', 'Password12', 0634567890, 'admin', 'dorpsstraat', 'Breda'), (7, 'john', 'doe', 1, 'john.doe@example.com', 'Password12', 0612345678, 'guest', 'Straat 12', 'Nur Sultan')";
 
-describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
+describe("UC-204 Opvragen van usergegevens bij ID", () => {
     before((done) => {
         pool.query(CLEAR_DB, (err, result) => {
             assert(err === null);
@@ -43,8 +43,8 @@ describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null)
-                let { code, message, data } = res.body
-                expect(code).to.equal(401)
+                let { status, message, data } = res.body
+                expect(status).to.equal(401)
                 expect(message).to.equal('Invalid token!')
                 expect(data).to.be.an('object').that.is.empty
                 done()
@@ -87,6 +87,8 @@ describe("UC-203 Opvragen van gebruikersprofiel (ingelogde gebruiker)", () => {
                 expect(data.id).to.equal(userId)
                 expect(data.firstName).to.equal('John')
                 expect(data.lastName).to.equal('deere')
+                expect(data.emailAdress).to.equal('john.deere@example.com')
+                expect(data.password).to.equal('Password12')
 
                 done();
             });

@@ -7,10 +7,7 @@ const pool = require('../util/mysql-db');
 const { logger, jwtSecretKey } = require('../util/utils');
 
 module.exports = {
-    /**
-     * login  
-     * Retourneer een geldig token indien succesvol
-     */
+    //UC-101 - Inloggen
     login(req, res, next) {
         logger.info(req.body);
 
@@ -54,7 +51,7 @@ module.exports = {
                                 logger.info('Token gegenereerd: ', token);
                                 if (token) {
                                     res.status(200).json({
-                                        code: 200,
+                                        status: 200,
                                         message: 'Login endpoint',
                                         data: {
                                             id,
@@ -68,14 +65,14 @@ module.exports = {
                             });
                         } else if (results.length === 0) {
                             res.status(404).json({
-                                code: 404,
+                                status: 404,
                                 message: 'User not found',
                                 data: {}
                             });
                         } else {
                             //user wel gevonden maar password matcht niet
                             res.status(400).json({
-                                code: 400,
+                                status: 400,
                                 message: 'Not authorized',
                                 data: {}
                             });
@@ -106,9 +103,10 @@ module.exports = {
             );
             next();
         } catch (ex) {
-            res.status(422).json({
-                error: ex.toString(),
-                datetime: new Date().toISOString()
+            res.status(400).json({
+                status: 400,
+                message: "Not authorized",
+                data: {}
             });
         }
     },
@@ -121,8 +119,8 @@ module.exports = {
         logger.info('AuthHeader:', authHeader)
         if (!authHeader) {
             logger.info('No authHeader found!')
-            next({
-                code: 401,
+            res.status(401).json({
+                status: 401,
                 message: 'Authorization header missing!',
                 data: {}
             });
@@ -139,7 +137,7 @@ module.exports = {
             if (!payload) {
                 logger.info('Invalid token!')
                 res.status(401).json({
-                    code: 401,
+                    status: 401,
                     message: 'Invalid token!',
                     data: {}
                 });

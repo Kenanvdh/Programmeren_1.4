@@ -48,6 +48,7 @@ describe("UC-206 Verwijderen van user", () => {
 
                 expect(status).to.equal(404);
                 expect(message).to.equal('User not found')
+                expect(res.body.data).to.be.an('object');
                 expect(data).to.be.empty;
 
                 done();
@@ -63,10 +64,11 @@ describe("UC-206 Verwijderen van user", () => {
             .set("Authorization", "Bearer: ")
             .end((err, res) => {
                 assert(err === null);
-                let { data, message, code } = res.body;
+                let { data, message, status } = res.body;
 
-                expect(code).to.equal(401);
+                expect(status).to.equal(401);
                 expect(message).to.equal('Invalid token!')
+                expect(res.body.data).to.be.an('object');
                 expect(data).to.be.empty;
 
                 done();
@@ -87,6 +89,7 @@ describe("UC-206 Verwijderen van user", () => {
 
                 expect(status).to.equal(403);
                 expect(message).to.equal('You cannot delete someone elses info.')
+                expect(res.body.data).to.be.an('object');
                 expect(data).to.be.empty;
 
                 done();
@@ -107,7 +110,8 @@ describe("UC-206 Verwijderen van user", () => {
 
                 expect(status).to.equal(200);
                 expect(message).to.equal('User deleted met ID ' + userId )
-
+                expect(res.body.data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
     });

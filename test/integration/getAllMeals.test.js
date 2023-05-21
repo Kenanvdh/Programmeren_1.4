@@ -41,7 +41,7 @@ describe("UC-303 Opvragen van alle maaltijden", () => {
         });
     });
 
-    it("TC-303-1 Maaltijd succesvol toegevoegd", (done) => {
+    it("TC-303-1 Lijst van maaltijden geretourneerd", (done) => {
         const token = jwt.sign({ userId: 1 }, jwtSecretKey);
         
         chai
@@ -49,9 +49,27 @@ describe("UC-303 Opvragen van alle maaltijden", () => {
             .get("/api/meal")
             .set("Authorization", "Bearer " + token)
             .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.have.property("message", "Meal getAll endpoint");
-                res.body.should.have.property("data");
+                assert(err === null);
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.equal("Meal getAll endpoint");
+                data.forEach((meal) => {
+                    expect(meal).to.be.an("object");
+                    expect(meal).to.have.property("id");
+                    expect(meal).to.have.property("isActive");
+                    expect(meal).to.have.property("isVega");
+                    expect(meal).to.have.property("isVegan");
+                    expect(meal).to.have.property("isToTakeHome");
+                    expect(meal).to.have.property("dateTime");
+                    expect(meal).to.have.property("maxAmountOfParticipants");
+                    expect(meal).to.have.property("price");
+                    expect(meal).to.have.property("imageUrl");
+                    expect(meal).to.have.property("createDate");
+                    expect(meal).to.have.property("updateDate");
+                    expect(meal).to.have.property("name");
+                    expect(meal).to.have.property("description");
+                    expect(meal).to.have.property("allergenes");
+                  });
                 done();
             });
     });

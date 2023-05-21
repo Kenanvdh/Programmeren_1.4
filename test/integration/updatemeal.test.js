@@ -50,28 +50,29 @@ describe("UC-302 Wijzigen van maaltijdgegevens", () => {
             isVegan: 0,
             isToTakeHome: 0,
             dateTime: "2023-05-20 18:30:00",
-            maxAmountOfParticipants: 8,
             imageUrl: "https://example.com/image1.jpg",
             cookId: 1,
             createDate: "2023-05-18",
             updateDate: "2023-05-18",
-            name: "Meal",
             description: "This is the description for Meal 1",
             allergenes: "lactose",
         };
 
         chai
             .request(server)
-            .put(`/api/meal/${mealId}`)
-            .set("Authorization", `Bearer ${token}`)
+            .put(`/api/meal/ ${mealId}`)
             .send(meal)
+            .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(400);
-                expect(res.body.message).to.contain("Invalid input for one or more fields");
-                expect(res.body.data).to.be.an('object');
+                let { data, message, status } = res.body;
+                expect(status).to.equal(400);
+                expect(message).to.equal("Invalid input for one or more fields");
+                expect(data).to.be.an('object');
+                expect(data).to.be.empty;
                 done();
             });
+
     });
 
     it("TC-302-2 Niet ingelogd", (done) => {
@@ -101,10 +102,13 @@ describe("UC-302 Wijzigen van maaltijdgegevens", () => {
             .send(meal)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(401);
-                expect(res.body.message).to.be.equal("Invalid token!");
+                let { data, message, status } = res.body;
+
+                expect(status).to.equal(401);
+                expect(message).to.equal('Invalid token!')
                 expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                expect(data).to.be.empty;
+
                 done();
             });
     });
@@ -135,11 +139,14 @@ describe("UC-302 Wijzigen van maaltijdgegevens", () => {
             .set("Authorization", "Bearer " + token)
             .send(meal)
             .end((err, res) => {
-                assert(err === null)
-                expect(res).to.have.status(403);
+                assert(err === null);
+                let { data, message, status } = res.body;
+
+                expect(status).to.equal(403);
+                expect(message).to.equal('You cannot update someone elses meal-info.')
                 expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
-                expect(res.body.message).to.contain('You cannot update someone elses meal-info.');
+                expect(data).to.be.empty;
+
                 done();
             });
     });
@@ -171,10 +178,12 @@ describe("UC-302 Wijzigen van maaltijdgegevens", () => {
             .send(meal)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(404);
-                expect(res.body.message).to.be.equal("Meal niet gevonden");
+                let { data, message, status } = res.body;
+
+                expect(status).to.equal(404);
+                expect(message).to.equal('Meal niet gevonden')
                 expect(res.body.data).to.be.an('object');
-                expect(res.body.data).to.be.empty;
+                expect(data).to.be.empty;
                 done();
             });
     });
@@ -202,13 +211,27 @@ describe("UC-302 Wijzigen van maaltijdgegevens", () => {
         chai
             .request(server)
             .put(`/api/meal/${mealId}`)
-            .set("Authorization", `Bearer ${token}`)
             .send(meal)
+            .set("Authorization", "Bearer " + token)
             .end((err, res) => {
                 assert(err === null);
-                expect(res).to.have.status(200);
-                expect(res.body.message).to.contain("Meal updated with id ");
-                expect(res.body.data).to.be.an('object');
+                let { data, message, status } = res.body;
+                expect(status).to.equal(200);
+                expect(message).to.contain("Meal updated with id");
+                expect(data.isActive).to.equal(1);
+                expect(data.isVega).to.equal(0);
+                expect(data.isVegan).to.equal(0);
+                expect(data.isToTakeHome).to.equal(0);
+                expect(data.dateTime).to.equal("2023-05-20 18:30:00");
+                expect(data.maxAmountOfParticipants).to.equal(8);
+                expect(data.price).to.equal("15.99");
+                expect(data.imageUrl).to.equal("https://example.com/image1.jpg");
+                expect(data.cookId).to.equal(1);
+                expect(data.createDate).to.equal("2023-05-18");
+                expect(data.name).to.equal("Meal 1")
+                expect(data.updateDate).to.equal("2023-05-18");
+                expect(data.description).to.equal("This is the description for Meal 1");
+                expect(data.allergenes).to.equal("lactose");
                 done();
             });
     });
