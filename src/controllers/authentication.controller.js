@@ -10,81 +10,82 @@ module.exports = {
     //UC-101 - Inloggen
     login(req, res, next) {
         logger.info(req.body);
-
+      
         pool.getConnection((err, connection) => {
-            if (err) {
-                logger.error('Error getting connection from pool');
+          if (err) {
+            logger.error('Error getting connection from pool');
+            res.status(500).json({
+              code: 500,
+              message: err.code
+            });
+          } else {
+            logger.trace('Login called');
+            const sqlStatement = 'SELECT * FROM `user` WHERE `emailAdress`=?';
+      
+            connection.query(sqlStatement, [req.body.emailAdress], function (err, results, fields) {
+              pool.releaseConnection(connection);
+      
+              if (err) {
+                logger.error(err.message);
                 next({
-                    code: 500,
-                    message: err.code
+                  code: 409,
+                  message: err.message
                 });
-            }
-            if (connection) {
-                logger.trace('Login called')
-                const sqlStatement = 'SELECT * FROM `user` WHERE `emailAdress`=? '
-
-                connection.query(sqlStatement, [req.body.emailAdress], function (err, results, fields) {
-                    pool.releaseConnection(connection);
-                    if (err) {
-                        logger.error(err.message);
-                        next({
-                            code: 409,
-                            message: err.message
+              } else {
+                if (results.length === 0) {
+                  res.status(404).json({
+                    status: 404,
+                    message: 'User not found',
+                    data: {}
+                  });
+                } else {
+                  const user = results[0];
+      
+                  if (user.password === req.body.password) {
+                    const { password, id, ...userInfo } = user;
+      
+                    const payload = {
+                      userId: id
+                    };
+      
+                    logger.info('Payload aangemaakt', payload);
+      
+                    jwt.sign(payload, jwtSecretKey, { expiresIn: '2d' }, (err, token) => {
+                      logger.info('Token gegenereerd: ', token);
+                      if (token) {
+                        res.status(200).json({
+                          status: 200,
+                          message: 'Login endpoint',
+                          data: {
+                            id,
+                            ...userInfo,
+                            token: token
+                          }
                         });
-                    }
-                    if (results) {
-                        logger.info('Found', results.length, 'results');
-
-                        //0 results: geen user, geen toegang
-                        //1 result: user gevonden, password checken
-
-                        if (results.length === 1 && results[0].password === req.body.password) {
-                            const { password, id, ...userInfo } = results[0];
-
-                            const payload = {
-                                userId: id
-                            };
-
-                            logger.info('Payload aangemaakt', payload);
-
-                            //token genereren
-                            jwt.sign(payload, jwtSecretKey, { expiresIn: '2d' }, (err, token) => {
-                                logger.info('Token gegenereerd: ', token);
-                                if (token) {
-                                    res.status(200).json({
-                                        status: 200,
-                                        message: 'Login endpoint',
-                                        data: {
-                                            id,
-                                            ...userInfo,
-                                            token: token
-                                        }
-                                    });
-                                }
-                                logger.info('Payload: ', payload)
-                                next()
-                            });
-                        } else if (results.length === 0) {
-                            res.status(404).json({
-                                status: 404,
-                                message: 'User not found',
-                                data: {}
-                            });
-                        } else {
-                            //user wel gevonden maar password matcht niet
-                            res.status(400).json({
-                                status: 400,
-                                message: 'Not authorized',
-                                data: {}
-                            });
-                            next();
-                        }
-                    }
-                });
-                pool.releaseConnection(connection);
-            }
+                      } else {
+                        logger.info('Failed to generate token');
+                        res.status(500).json({
+                          status: 500,
+                          message: 'Failed to generate token',
+                          data: {}
+                        });
+                      }
+                    });
+                  } else {
+                    res.status(400).json({
+                      status: 400,
+                      message: 'Not authorized',
+                      data: {}
+                    });
+                    next();
+                  }
+                }
+              }
+            });
+          }
         });
-    },
+      },
+      
 
     /*
      * Validatie functie voor /api/login,
